@@ -160,8 +160,12 @@ const showColor = color => chalk.rgb(Math.round(color.red), Math.round(color.gre
 
 const showAnim = anim => {
   let s = ''
-  for(time = 0; time <= anim.duration; time += 0.2) {
-    s += showColor(anim.color(time))('█') // U+2588 FULL BLOCK
+  if(anim.duration < 0.1) {
+    s = showColor(anim.color(0))('❙') // U+2759 MEDIUM VERTICAL BAR
+  } else {
+    for(time = 0; time <= anim.duration; time += 0.2) {
+      s += showColor(anim.color(time))('█') // U+2588 FULL BLOCK
+    }
   }
   return('[' + s + ']')
 }
