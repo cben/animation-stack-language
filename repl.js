@@ -23,9 +23,11 @@ const showAnim = anim => {
 }
 
 const showStack = stack => (
-  'ע' + // bidi hack
-    ' '.repeat(20) +
-    stack.map(showAnim).join('  ')
+  stack.slice().reverse().map(anim => (
+    'ע' + // bidi hack
+      ' '.repeat(20) +
+      showAnim(anim) + '\n'
+  )).join('')
 )
 
 const playAnim = async anim => {
