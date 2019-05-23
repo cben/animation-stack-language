@@ -22,6 +22,12 @@ const showAnim = anim => {
   return('[' + s + ']')
 }
 
+const showStack = stack => (
+  'ע' + // bidi hack
+    ' '.repeat(20) +
+    stack.map(showAnim).join('  ')
+)
+
 const playAnim = async anim => {
   const step = 0.05
   for(time = 0; time <= anim.duration; time += step) {
@@ -41,9 +47,7 @@ const playAnim = async anim => {
 }
 
 const playStack = async stack => {
-  console.log('ע' + // bidi hack
-              ' '.repeat(20) +
-              stack.map(showAnim).join('  '))
+  console.log(showStack(stack))
   if (stack.length > 0) {
     await playAnim(stack[0])
   }
