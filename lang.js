@@ -35,6 +35,33 @@ const mixLight = (c1, c2, fraction) => (
   mapChannels2(c1, c2, (v1, v2) => v1*fraction + v2*(1-fraction))
 )
 
+// Animations
+// ----------
+// .duration attribute in seconds
+// .color(time in [0,duration]) -> {red, green, blue}
+
+// normalizes time to [0, 1] range, safely mapping t/0 to 0.
+const timeFraction = (time, duration) => (
+  duration > 0 ? time / duration : 0
+)
+
+const mapTime = (anim, f) => (
+  {
+    duration: anim.duration,
+    // Typically f(color) ignores time, but optionally can look at 2nd argument f(color, time)
+    color: time => f(anim.color(time), timeFraction(time, anim.duration)),
+  }
+)
+
+const mapTime2 = (a1, a2, f) => (
+  {
+    // TODO: do something smarter given animations with different duration
+    duration: a1.duration,
+    color: time => f(a1.color(time), a2.color(time), timeFraction(time, a1.duration)),
+  }
+)
+
+
 // Words
 // =====
 // f(stack) -> stack.
@@ -43,9 +70,7 @@ const mixLight = (c1, c2, fraction) => (
 // Types on stack
 // --------------
 // (these are likely to change!)
-// - Animation:
-//   .duration attribute in seconds
-//   .color(time in [0,duration]) -> {red, green, blue}
+// - Currently, only animations!
 // - Fixed color on stack represented as animation with .duration == 1
 // - Number: TODO
 // - Error: TODO value or exception?
@@ -62,17 +87,20 @@ const fixedColor = (red, green, blue) => ({
   color: time => ({red, green, blue}),
 })
 
-words.black = constWord(fixedColor(0, 0, 0))
-words.red = constWord(fixedColor(COLOR_MAX, 0, 0))
-words.yellow = constWord(fixedColor(COLOR_MAX, COLOR_MAX, 0))
-words.green = constWord(fixedColor(0, COLOR_MAX, 0))
-words.cyan = constWord(fixedColor(0, COLOR_MAX, COLOR_MAX))
-words.blue = constWord(fixedColor(0, 0, COLOR_MAX))
-words.purple = constWord(fixedColor(COLOR_MAX, 0, COLOR_MAX))
-words.white = constWord(fixedColor(COLOR_MAX, COLOR_MAX, COLOR_MAX))
+colors = {
+  black: fixedColor(0, 0, 0),
+  red: fixedColor(COLOR_MAX, 0, 0),
+  yellow: fixedColor(COLOR_MAX, COLOR_MAX, 0),
+  green: fixedColor(0, COLOR_MAX, 0),
+  cyan: fixedColor(0, COLOR_MAX, COLOR_MAX),
+  blue: fixedColor(0, 0, COLOR_MAX),
+  purple: fixedColor(COLOR_MAX, 0, COLOR_MAX),
+  white: fixedColor(COLOR_MAX, COLOR_MAX, COLOR_MAX),
+}
 
-const finalColor = anim => anim.color(anim.duration)
-
+for(name in colors) {
+  words[name] = constWord(colors[name])
+}
 
 // TODO: stack manipulation helpers — do I need a Stack class with methods?
 // TODO: error for not enough arguments
@@ -113,15 +141,18 @@ const binaryWord = binaryFunc => (
   }
 )
 
-words.fade = binaryWord((a1, a2) => {
-  // TODO should fade do something smarter given animations with duration?
-  const c1 = finalColor(a1)
-  const c2 = finalColor(a2)
-  return {
-    duration: 1.0,
-    color: time => mixLight(c1, c2, time)
-  }
-})
+words.mix = binaryWord((a1, a2) => (
+  mapTime2(a1, a2, (c1, c2) => (
+    mixLight(c1, c2, 0.5)
+  ))
+))
+
+words.fade = binaryWord((a1, a2) => (
+  mapTime2(a1, a2, (c1, c2, timeFraction) => (
+    mixLight(c1, c2, timeFraction)
+  ))
+))
+
 
 // TODO naming: definitely not "concat". maybe "append"?
 words.join = binaryWord((a2, a1) => (
@@ -134,6 +165,16 @@ words.join = binaryWord((a2, a1) => (
 // 2 -> 2 word
 
 words.swap = ([x, y, ...rest]) => [y, x, ...rest]
+
+// rgbAnimation -> redAnimation greenAnimation blueAnimation
+
+words.split = stack => {
+  const [anim, ...rest] = stack
+  let r = mapTime(anim, ({red, green, blue}) => ({red, green: 0, blue: 0}))
+  let g = mapTime(anim, ({red, green, blue}) => ({red: 0, green, blue: 0}))
+  let b = mapTime(anim, ({red, green, blue}) => ({red: 0, green: 0, blue}))
+  return [b, g, r, ...rest]
+}
 
 // i18n
 
@@ -149,6 +190,8 @@ hebrewWords = {
   הפוך: words.reverse, הפוכ: words.reverse,
   מהר: words.fast,
   לאט: words.slow,
+  פצל: words.split,
+  ערבב: words.mix,
   מעבר: words.fade,
   חבר: words.join,
   החלף: words.swap,
