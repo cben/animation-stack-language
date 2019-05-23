@@ -64,8 +64,11 @@ const fixedColor = (red, green, blue) => ({
 
 words.black = constWord(fixedColor(0, 0, 0))
 words.red = constWord(fixedColor(COLOR_MAX, 0, 0))
+words.yellow = constWord(fixedColor(COLOR_MAX, COLOR_MAX, 0))
 words.green = constWord(fixedColor(0, COLOR_MAX, 0))
+words.cyan = constWord(fixedColor(0, COLOR_MAX, COLOR_MAX))
 words.blue = constWord(fixedColor(0, 0, COLOR_MAX))
+words.purple = constWord(fixedColor(COLOR_MAX, 0, COLOR_MAX))
 words.white = constWord(fixedColor(COLOR_MAX, COLOR_MAX, COLOR_MAX))
 
 const finalColor = anim => anim.color(anim.duration)
@@ -136,9 +139,12 @@ words.swap = ([x, y, ...rest]) => [y, x, ...rest]
 
 hebrewWords = {
   שחור: words.black,
-  ירוק: words.green,
   אדום: words.red,
+  צהוב: words.yellow,
+  ירוק: words.green,
+  תכלת: words.cyan,
   כחול: words.blue,
+  סגול: words.purple,
   לבן: words.white,
   הפוך: words.reverse, הפוכ: words.reverse,
   מהר: words.fast,
