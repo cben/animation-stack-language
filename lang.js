@@ -58,7 +58,7 @@ const constWord = (value) => (
 )
 
 const fixedColor = (red, green, blue) => ({
-  duration: 0,
+  duration: 1.0,
   color: time => ({red, green, blue}),
 })
 
