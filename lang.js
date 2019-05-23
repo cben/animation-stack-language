@@ -46,7 +46,7 @@ const mixLight = (c1, c2, fraction) => (
 // - Animation:
 //   .duration attribute in seconds
 //   .color(time in [0,duration]) -> {red, green, blue}
-// - Fixed color on stack represented as animation with .duration == 0
+// - Fixed color on stack represented as animation with .duration == 1
 // - Number: TODO
 // - Error: TODO value or exception?
 //   TODO: voice message
