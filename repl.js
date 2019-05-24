@@ -8,7 +8,7 @@ const chalk = require('chalk')
 
 const sleep = milliSeconds => new Promise(resolve => setTimeout(resolve, milliSeconds))
 
-const showColor = color => chalk.rgb(Math.round(color.red), Math.round(color.green), Math.round(color.blue))
+const showColor = color => chalk.rgb(Math.round(lang.clipChannel(color.red)), Math.round(lang.clipChannel(color.green)), Math.round(lang.clipChannel(color.blue)))
 
 const showAnim = anim => {
   let s = ''

@@ -10,17 +10,17 @@ const clipChannel = v => (v < 0 ? 0 : v > COLOR_MAX ? COLOR_MAX : v)
 
 const mapChannels1 = (color, f) => (
   {
-    red: clipChannel(f(color.red)),
-    green: clipChannel(f(color.green)),
-    blue: clipChannel(f(color.blue)),
+    red: f(color.red),
+    green: f(color.green),
+    blue: f(color.blue),
   }
 )
 
 const mapChannels2 = (c1, c2, f) => (
   {
-    red: clipChannel(f(c1.red, c2.red)),
-    green: clipChannel(f(c1.green, c2.green)),
-    blue: clipChannel(f(c1.blue, c2.blue)),
+    red: f(c1.red, c2.red),
+    green: f(c1.green, c2.green),
+    blue: f(c1.blue, c2.blue),
   }
 )
 
@@ -133,6 +133,14 @@ words.fast = unaryWord(a => (
   }
 ))
 
+words.dark = unaryWord(a => mapTime(a, c => mapChannels1(c, x => x * 0.5)))
+words.light = unaryWord(a => mapTime(a, c => mapChannels1(c, x => x * 2)))
+// TODO is this the best behavior?
+// + mixing with white avoids overflow
+// - `dark light` are not inverses like `slow fast`
+// - both dark and light reduce saturation!
+//words.light = unaryWord(a => mapTime(a, c => mixLight(c, colors.white, 0.5)))
+
 const binaryWord = binaryFunc => (
   stack => {
     const [x, y, ...rest] = stack
@@ -147,6 +155,12 @@ words.mix = binaryWord((a1, a2) => (
   ))
 ))
 
+words.add = binaryWord((a1, a2) => (
+  mapTime2(a1, a2, (c1, c2) => (
+    addLight(c1, c2)
+  ))
+))
+
 words.fade = binaryWord((a1, a2) => (
   mapTime2(a1, a2, (c1, c2, timeFraction) => (
     mixLight(c1, c2, timeFraction)
@@ -155,15 +169,17 @@ words.fade = binaryWord((a1, a2) => (
 
 
 // TODO naming: definitely not "concat". maybe "append"?
-words.join = binaryWord((a2, a1) => (
+words.glue = binaryWord((a2, a1) => (
   {
     duration: a1.duration + a2.duration,
     color: time => time < a1.duration ? a1.color(time) : a2.color(time - a1.duration),
   }
 ))
 
-// 2 -> 2 word
+// stack words
 
+words.drop = ([x, ...rest]) => [...rest]
+words.copy = ([x, ...rest]) => [x, x, ...rest]
 words.swap = ([x, y, ...rest]) => [y, x, ...rest]
 
 // rgbAnimation -> redAnimation greenAnimation blueAnimation
@@ -190,11 +206,16 @@ hebrewWords = {
   הפוך: words.reverse, הפוכ: words.reverse,
   מהר: words.fast,
   לאט: words.slow,
+  כהה: words.dark,
+  בהיר: words.light,
   פצל: words.split,
   ערבב: words.mix,
   מעבר: words.fade,
-  חבר: words.join,
+  חבר: words.add,
+  הדבק: words.glue,
   החלף: words.swap,
+  זרוק: words.drop,
+  שכפל: words.copy,
 }
 
-module.exports = { words, hebrewWords };
+module.exports = { words, hebrewWords, COLOR_MAX, clipChannel };
