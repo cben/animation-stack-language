@@ -1,7 +1,7 @@
 const lang = require('./lang')
 
-// REPL
-// ----
+// Terminal REPL
+// -------------
 
 const readline = require('readline')
 const chalk = require('chalk')
@@ -30,34 +30,38 @@ const showStack = stack => (
   )).join('')
 )
 
-const playAnim = async anim => {
-  const step = 0.05
-  for(time = 0; time <= anim.duration; time += step) {
-    const pos = Math.round(time / 0.2) // position inside [.....] above
-    const color = anim.color(time)
+// TODO column is kludge
+const playColor = async (color, {column}) => {
     const colored = showColor(color)
     process.stdout.write('ע' + // bidi hack
                          ' '.repeat(3) +
                          '(' + colored('⬤').repeat(5) + ')' + // U+2B24 BLACK LARGE CIRCLE
-                         colored('-').repeat((20 + '['.length + pos) - (3 + 1 + 5 + 1)) +
+                         colored('-').repeat((20 + '['.length + column) - (3 + 1 + 5 + 1)) +
                          '^' +
                          '\r')
+}
+
+const playAnim = async (anim, options) => {
+  const step = 0.05
+  for(time = 0; time <= anim.duration; time += step) {
+    const column = Math.round(time / 0.2) // position inside [.....] above
+    await options.playColor(anim.color(time), {column})
     await sleep(step * 1000)
   }
   //process.stdout.write('\n')
   process.stdout.write(' '.repeat(60) + '\r')
 }
 
-const playStack = async stack => {
+const playStack = async (stack, options) => {
   console.log(showStack(stack))
   if (stack.length > 0) {
-    await playAnim(stack[0])
+    await playAnim(stack[0], options)
   }
 }
 
-const repl = async (dictionary, stack0) => {
+const repl = async (stack0, options) => {
   let stack = stack0
-  await playStack(stack)
+  await playStack(stack, options)
 
   var reader = readline.createInterface({
     input: process.stdin,
@@ -65,12 +69,13 @@ const repl = async (dictionary, stack0) => {
     terminal: false
   })
   reader.on('line', async w => {
-    if (dictionary[w]) {
-      stack = dictionary[w](stack)
+    if (options.dictionary[w]) {
+      stack = options.dictionary[w](stack)
+      await playStack(stack, options)
     } else {
       console.error('מה?')
+      await showStack(stack, options)
     }
-    await playStack(stack)
   })
 
   return stack // is this reachable?
@@ -101,4 +106,10 @@ const test = async () => {
 }
 
 //test()
-repl(lang.hebrewWords, [])
+
+repl([], {dictionary: lang.hebrewWords, playColor: playColor})
+
+module.exports = {
+  playColor,
+  repl,
+}
