@@ -63,17 +63,18 @@ const playStack = async stack => {
 }
 
 const repl = async (dictionary, stack0) => {
-  let stack = stack0
-  await playStack(stack)
-
+  const allCompletions = Object.keys(dictionary).sort()
   var reader = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
     completer: line => (
-      [Object.keys(dictionary).filter(w => w.startsWith(line)), line]
+      [allCompletions.filter(w => w.startsWith(line)), line]
     ),
     prompt: PROMPT,
   })
+
+  let stack = stack0
+  await playStack(stack)
 
   reader.prompt()
   reader.on('line', async w => {
