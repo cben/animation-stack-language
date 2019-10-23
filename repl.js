@@ -67,10 +67,11 @@ const repl = async (dictionary, stack0) => {
   reader.on('line', async w => {
     if (dictionary[w]) {
       stack = dictionary[w](stack)
+      await playStack(stack)
     } else {
       console.error('מה?')
+      console.log(showStack(stack))
     }
-    await playStack(stack)
   })
 
   return stack // is this reachable?
