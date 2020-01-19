@@ -3,6 +3,8 @@ const lang = require('./lang')
 // REPL
 // ----
 
+const leds = require('./apa102_led_strip')
+
 const readline = require('readline')
 const chalk = require('chalk')
 
@@ -15,7 +17,7 @@ const showAnim = anim => {
   if(anim.duration < 0.1) {
     s = showColor(anim.color(0))('❙') // U+2759 MEDIUM VERTICAL BAR
   } else {
-    for(time = 0; time <= anim.duration; time += 0.2) {
+    for(let time = 0; time <= anim.duration; time += 0.2) {
       s += showColor(anim.color(time))('█') // U+2588 FULL BLOCK
     }
   }
@@ -30,9 +32,12 @@ const showStack = stack => (
   )).join('')
 )
 
+// TODO: use shared time source to synchronize parallel animations to actual
+// passage of time, instead of each one doing independent sleep().
+
 const playAnim = async anim => {
   const step = 0.05
-  for(time = 0; time <= anim.duration; time += step) {
+  for(let time = 0; time <= anim.duration; time += step) {
     const pos = Math.round(time / 0.2) // position inside [.....] above
     const color = anim.color(time)
     const colored = showColor(color)
@@ -48,11 +53,47 @@ const playAnim = async anim => {
   process.stdout.write(' '.repeat(60) + '\r')
 }
 
+const ledsShowStackAtTime = async (stack, time) => {
+  //process.stdout.write(time + ' ')
+  for(let i = 0; i < leds.NLEDS; i++) {
+    if(i < stack.length) {
+      const anim = stack[i]
+      // animate, when done, revert to initial color
+      const color = anim.color(time <= anim.duration ? time : 0)
+      // TODO: leds are far too bright, not similar to colors on screen
+      // (e.g. dark brown on screen is still quite bright pink on leds)
+      leds.setRGBb(i, lang.clipChannel(color.red), lang.clipChannel(color.green), lang.clipChannel(color.blue), 255)
+      //process.stdout.write(showColor(color)(' ' + i))
+    } else {
+      // clear to black beyond bottom of stack
+      leds.setRGBb(i, 0, 0, 0, 0)
+    }
+  }
+  await leds.send()
+  //process.stdout.write('\n')
+}
+
+const ledsPlayStack = async stack => {
+  if(stack.length === 0) {
+    await ledsShowStackAtTime(stack, 0) // force clearing LED strip to black.
+    return
+  }
+  const maxDuration = Math.max(...stack.map(a => a.duration))
+  const step = 0.01
+  // TODO: it seems white->black fades don't reach complete fade, why?
+  for(let time = 0; time <= maxDuration; time += step) {
+    await ledsShowStackAtTime(stack, time)
+    await sleep(step * 1000)
+  }
+}
+
 const playStack = async stack => {
   console.log(showStack(stack))
+  const promises = [ledsPlayStack(stack)]
   if (stack.length > 0) {
-    await playAnim(stack[0])
+    promises.push(playAnim(stack[0]))
   }
+  await Promise.all(promises)
 }
 
 const repl = async (dictionary, stack0) => {
@@ -95,9 +136,9 @@ const evalWords = async (dictionary, stack0, program) => {
 // todo move somewhere
 
 const test = async () => {
-  await evalWords(lang.words, [], ['black', 'white',  'fade', 'white', 'black', 'fade', 'swap', 'join'])
+  await evalWords(lang.words, [], ['black', 'white',  'fade', 'white', 'black', 'fade', 'swap', 'glue'])
 
-  await evalWords(lang.words, [], ['red', 'green',  'fade', 'green', 'blue', 'fade', 'slow', 'slow', 'join', 'fast'])
+  await evalWords(lang.words, [], ['red', 'green',  'fade', 'green', 'blue', 'fade', 'slow', 'slow', 'glue', 'fast'])
 }
 
 //test()
