@@ -6,6 +6,22 @@ Ofek reads well and writes, Maayan doesn't quite read yet.
 I want not only to teach some coding but also to _encourage literacy_.
 I want a "CLI" where typing gives them some magic power, specifically controlling the RGB light in their room.
 
+## How to run
+
+Currently the only interface is a terminal REPL.  One command per line.  No way to go back and edit previous commands.
+
+```sh
+git clone https://github.com/cben/animation-stack-language
+cd animation-stack-language
+npm install  # or yarn install
+node repl.js
+```
+
+Currently defaults to Hebrew.  Press TAB to list of known commands.  You'll want a terminal that supports both right-to-left text and True Color attributes.  `pterm` (port of Putty from windows) worked best for me on Fedora; `konsole` is also not bad.
+
+* For English, edit the last line of repl.js from `lang.hebrewWords` to use `lang.words`, although the prompt uses some right-to-left chars.
+* Translation pull requests welcome!
+
 ## Why a stack language?
 
  1. The notional machine is _extremely_ simple and transparent.
