@@ -39,10 +39,12 @@ const showStack = stack => (
   )).join('')
 )
 
+// Allow later pasted commands to abort all previously running animations.
+// Each animation remembers initial "generation" and aborts when incremented.
+var generation = 0
+
 const playAnim = async anim => {
-  // TODO use actual elapsed time instead of regular time steps
-  const step = 0.001
-  for(time = 0; time <= anim.duration; time += step) {
+  const step = async time => {
     const pos = Math.round(time / 0.2) // position inside [.....] above
     const color = anim.color(time)
     const colored = showColor(color)
@@ -53,8 +55,25 @@ const playAnim = async anim => {
                          '^' +
                          '\r')
     await yeelight_rgb.playColor(color)
-    await sleep(step * 1000)
+    //await sleep(1)
   }
+
+  var ms0 = Date.now()
+  var initialGeneration = generation
+  while(true) {
+    if(generation > initialGeneration) {
+      console.log('ABORT')
+      break
+    }
+    var time = (Date.now() - ms0) * 0.001
+    if(time > anim.duration) {
+      // Finish on final color
+      //await step(anim.duration)
+      break
+    }
+    await step(time)
+  }
+
   //process.stdout.write('\n')
   process.stdout.write(' '.repeat(60) + '\r')
 }
@@ -82,6 +101,7 @@ const repl = async (dictionary, stack0) => {
 
   reader.prompt()
   reader.on('line', async w => {
+    generation++
     if (w == '') {
       // Allow <Enter> to re-display stack, useful after losing sight from errors and completions
       await playStack(stack)
