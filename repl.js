@@ -6,6 +6,8 @@ const lang = require('./lang')
 const readline = require('readline')
 const chalk = require('chalk')
 
+const yeelight_rgb = require('./yeelight_rgb')
+
 const sleep = milliSeconds => new Promise(resolve => setTimeout(resolve, milliSeconds))
 
 const showColor = color => chalk.rgb(Math.round(lang.clipChannel(color.red)), Math.round(lang.clipChannel(color.green)), Math.round(lang.clipChannel(color.blue)))
@@ -38,17 +40,19 @@ const showStack = stack => (
 )
 
 const playAnim = async anim => {
-  const step = 0.05
+  // TODO use actual elapsed time instead of regular time steps
+  const step = 0.001
   for(time = 0; time <= anim.duration; time += step) {
     const pos = Math.round(time / 0.2) // position inside [.....] above
     const color = anim.color(time)
     const colored = showColor(color)
-    process.stdout.write(RIGHT_TO_LEFT +
+    await process.stdout.write(RIGHT_TO_LEFT +
                          ' '.repeat(3) +
                          '(' + colored('⬤').repeat(5) + ')' + // U+2B24 BLACK LARGE CIRCLE
                          colored('-').repeat((20 + '['.length + pos) - (3 + 1 + 5 + 1)) +
                          '^' +
                          '\r')
+    await yeelight_rgb.playColor(color)
     await sleep(step * 1000)
   }
   //process.stdout.write('\n')
