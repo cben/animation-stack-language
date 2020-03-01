@@ -40,7 +40,9 @@ const playColor = async ({red, green, blue}) => {
     return
   }
   const rgb = red << 16 | green << 8 | blue
-  await reverseSocket.write(command("set_rgb", rgb, "smooth", 1)) // 1ms probably ignored?
+  await new Promise(resolve => {
+    reverseSocket.write(command("set_rgb", rgb, "sudden", 0), resolve)
+  })
 }
 
 const sleep = (ms) => new Promise((resolve) => {
@@ -55,9 +57,10 @@ const playAnim = async ({color, duration}) => {
     var t = (Date.now() - ms0) * 0.001
     //console.log(t)
     if(t > duration) {
+      await playColor(color(duration))
       break
     }
-    await playColor(anim.color(t))
+    await playColor(color(t))
     //await sleep(0.001)
   }
 }
