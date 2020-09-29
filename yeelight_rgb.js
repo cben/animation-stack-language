@@ -8,8 +8,12 @@ const CONTROL_PORT = 55443
 const LISTEN_HOST = process.env["OUR_IP"] // TODO discover
 const LISTEN_PORT = 30000 // whatever we want
 
-const command = (method, ...params) =>
-      JSON.stringify({id: 0, method: method, params: params}) + "\r\n"
+let id = 0;
+const command = (method, ...params) => {
+  id++
+  return JSON.stringify({ id: id, method: method, params: params }) + "\r\n"
+}
+
 
 var reverseSocket = null
 var reverseServer = new net.Server()
