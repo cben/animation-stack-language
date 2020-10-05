@@ -87,7 +87,7 @@ const fixedColor = (red, green, blue) => ({
   color: time => ({red, green, blue}),
 })
 
-colors = {
+const colors = {
   black: fixedColor(0, 0, 0),
   red: fixedColor(COLOR_MAX, 0, 0),
   yellow: fixedColor(COLOR_MAX, COLOR_MAX, 0),
@@ -194,7 +194,7 @@ words.split = stack => {
 
 // i18n
 
-hebrewWords = {
+let hebrewWords = {
   שחור: words.black,
   אדום: words.red,
   צהוב: words.yellow,
