@@ -14,7 +14,8 @@ cd animation-stack-language
 yarn install
 yarn start
 ```
-Then open http://localhost:5000/
+Then open http://localhost:5000/.
+Shows stack at current cursor position, updated on any edit / cursor movement (BUG: only when placed between words). 
 
 ## How to run — terminal REPL
 
