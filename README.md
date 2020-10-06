@@ -6,8 +6,13 @@ Ofek reads well and writes, Maayan doesn't quite read yet.
 I want not only to teach some coding but also to _encourage literacy_.
 I want a "CLI" where typing gives them some magic power, specifically controlling the RGB light in their room.
 
-## How to run — experimental UI
+## UI: https://animation-stack-language.netlify.app/
 
+⚠ Experimental ^_^.
+
+Shows stack at current cursor position, updated on any edit / cursor movement (BUG: only when placed between words).
+
+Locally:
 ```sh
 git clone https://github.com/cben/animation-stack-language
 cd animation-stack-language
@@ -15,7 +20,7 @@ yarn install
 yarn start
 ```
 Then open http://localhost:5000/.
-Shows stack at current cursor position, updated on any edit / cursor movement (BUG: only when placed between words). 
+
 
 ## How to run — terminal REPL
 
@@ -24,7 +29,7 @@ One command per line.  No way to go back and edit previous commands.
 ```sh
 git clone https://github.com/cben/animation-stack-language
 cd animation-stack-language
-npm install  # or yarn install
+yarn install
 node repl.js
 ```
 
