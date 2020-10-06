@@ -22,7 +22,7 @@ const showAnim = anim => {
   if(anim.duration < 0.1) {
     s = showColor(anim.color(0))('❙') // U+2759 MEDIUM VERTICAL BAR
   } else {
-    for(time = 0; time <= anim.duration; time += 0.2) {
+    for (let time = 0; time <= anim.duration; time += 0.2) {
       s += showColor(anim.color(time))('█') // U+2588 FULL BLOCK
     }
   }
@@ -39,7 +39,7 @@ const showStack = stack => (
 
 const playAnim = async anim => {
   const step = 0.05
-  for(time = 0; time <= anim.duration; time += step) {
+  for (let time = 0; time <= anim.duration; time += step) {
     const pos = Math.round(time / 0.2) // position inside [.....] above
     const color = anim.color(time)
     const colored = showColor(color)
