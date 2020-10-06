@@ -48,7 +48,7 @@ Currently defaults to Hebrew.  Press TAB to list of known commands.  You'll want
 
     [1]: https://www.forth.com/starting-forth/2-stack-manipulation-operators-arithmetic/#SWAP
 
-    The price of simple machines, is they're extremely _imperative_ & descructive.
+    The price of simple machines, is they're extremely _imperative_ & destructive.
     Many actions _consume_ a 1 or 2 last produced values off the stack, and if that's not what you wanted, bummer 💣...
 
  2. No structured syntax to learn/understand!
@@ -114,3 +114,24 @@ black    white    fade        white    black        fade        join            
 
 Visualizing processes as graphs of time is an important idea to teach in itself!
 Cf. Bret Victor's  http://worrydream.com/LadderOfAbstraction/ and http://worrydream.com/#!/MediaForThinkingTheUnthinkable .
+
+## Future
+
+### Defining custom words
+
+I'm considering making it part of the UI — give you a separate editor per word — to escape the question of definition syntax.
+
+### Collaborative editing
+
+I want to plug this into something like firepad / Yjs to support remote coding sessions.
+
+### New types: vectors / graphics
+
+I want to progress into graphics and possibly even simple games.
+=> The stack element type will likely change to vectors / pictures.
+
+Not entirely unlike turtle graphics, but with explicit operators to combine pictures by movement / rotation / scaling / overlaying / intersections?
+
+#### Interaction?!?
+
+I have some crazy ideas about how to represend input during games as appending words to definitions...  Pro: would work over collaborative editor for "multiplayer" (let's say step-based games only).  Con: crazy :-P.  Not sure at all yet if it's viable and whether it'll mix with current idea that stack elements are an animation over time...
