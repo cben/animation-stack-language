@@ -6,9 +6,19 @@ Ofek reads well and writes, Maayan doesn't quite read yet.
 I want not only to teach some coding but also to _encourage literacy_.
 I want a "CLI" where typing gives them some magic power, specifically controlling the RGB light in their room.
 
-## How to run
+## How to run — experimental UI
 
-Currently the only interface is a terminal REPL.  One command per line.  No way to go back and edit previous commands.
+```sh
+git clone https://github.com/cben/animation-stack-language
+cd animation-stack-language
+yarn install
+yarn start
+```
+Then open http://localhost:5000/
+
+## How to run — terminal REPL
+
+One command per line.  No way to go back and edit previous commands.
 
 ```sh
 git clone https://github.com/cben/animation-stack-language
@@ -37,12 +47,18 @@ Currently defaults to Hebrew.  Press TAB to list of known commands.  You'll want
 
  2. No structured syntax to learn/understand!
 
-    In a typical language with nested syntax you could implement blinking as
-    `twice { fade(black, white) ; fade(white, black) }`.
+    In a typical language with nested syntax you could implement blinking as:
+    ```
+    twice { fade(black, white) ; fade(white, black) }
+    ```
     In weird structured postfix it'd become:
-    `{ ( (black, white)fade, (white, black)fade )join }twice`
+    ```
+    { ( (black, white)fade, (white, black)fade )join }twice
+    ```
     but there's all this punctuation to get right; in stack language it's just:
-    `     black  white fade   white  black fade  join  twice`
+    ```
+         black  white fade   white  black fade  join  twice
+    ```
 
     The price of no syntax is the structure is implicit and has to be inferred from each function's arity:
 

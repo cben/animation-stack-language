@@ -1,0 +1,56 @@
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <script src="node_modules/browser-cjs/require.js"></script>
+  <style>
+    .source {
+      font-family: 'Courier New', Courier, monospace;
+      display: inline-block;
+      width: 40%;
+      height: 90%;
+      vertical-align: top;
+    }
+
+    .result {
+      display: inline-block;
+      vertical-align: top;
+    }
+
+    .stack {
+      padding: 4px;
+      border-bottom: 3px solid brown;
+    }
+
+    .animation {
+      padding-left: 2px;
+      padding-right: 2px;
+      border-left: 1px solid gray;
+      border-right: 1px solid gray;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+
+<body dir="auto">
+  <textarea dir="auto" class="source" id="source"> white black
+    fade slow
+blue
+swap
+
+red yellow fade
+yellow green fade 
+glue
+green cyan fade
+glue
+cyan blue fade
+glue
+blue purple fade
+glue
+</textarea>
+  <div class="result" id="result" />
+
+  <script src="notebook.js"></script>
+</body>
+
+</html>
