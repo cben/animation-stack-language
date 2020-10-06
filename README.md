@@ -46,7 +46,7 @@ Currently defaults to Hebrew.  Press TAB to list of known commands.  You'll want
     e.g. the [double-headed `swap` dragon][1] whose one head grabs the top item off the stack,
     second head grabs the next item, then they put them back in reverse order.
 
-    [1] https://www.forth.com/starting-forth/2-stack-manipulation-operators-arithmetic/#SWAP
+    [1]: https://www.forth.com/starting-forth/2-stack-manipulation-operators-arithmetic/#SWAP
 
     The price of simple machines, is they're extremely _imperative_ & descructive.
     Many actions _consume_ a 1 or 2 last produced values off the stack, and if that's not what you wanted, bummer 💣...
