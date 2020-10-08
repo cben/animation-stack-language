@@ -40,14 +40,13 @@ const renderAnim = (anim) => {
 const renderStack = (stack) => {
   let el = document.createElement("div")
   el.className = "stack"
-  el.append(...stack.map(renderAnim))
+  el.append(...stack.slice().reverse().map(renderAnim))
   return el
 }
 
 var source = document.getElementById("source")
-//window.source = source // for debugging
 
-var result = document.getElementById("result")
+var result = document.getElementById("stack")
 
 const showResult = () => {
   stack = evalText([], source.value, source.selectionStart)

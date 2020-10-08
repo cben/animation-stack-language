@@ -7,8 +7,9 @@
 </head>
 
 <body dir="auto">
-  <textarea dir="auto" class="source" id="source"> white black
-    fade slow
+  <div class="source-with-result">
+    <textarea dir="auto" class="source" id="source"> white black
+   fade slow
 blue
 swap
 
@@ -22,7 +23,12 @@ glue
 blue purple fade
 glue
 </textarea>
-  <div class="result" id="result" />
+    <div class="result">
+      <div class="before-stack"></div>
+      <div id="stack"></div>
+      <div class="after-stack"></div>
+    </div>
+  </div>
 
   <script src="notebook.js"></script>
 </body>
