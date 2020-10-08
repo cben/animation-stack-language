@@ -46,11 +46,11 @@ const renderStack = (stack) => {
 
 var source = document.getElementById("source")
 
-var result = document.getElementById("stack")
+var result = document.getElementById("result")
 
 const showResult = () => {
   stack = evalText([], source.value, source.selectionStart)
-  result.replaceChildren(renderStack(stack))
+  result.querySelector('.stack').replaceWith(renderStack(stack))
 }
 
 const textarea = document.querySelector('textarea');
