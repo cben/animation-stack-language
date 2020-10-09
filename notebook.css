@@ -20,8 +20,12 @@
     height: auto;
 }
 
-.eval-position {
+.eval-position.eval-good {
     border-bottom: 2px solid skyblue;
+}
+
+.eval-position.eval-error {
+    border-left: 2px solid red;
 }
 
 .result {

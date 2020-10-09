@@ -3,10 +3,9 @@ const CodeMirror = require('/node_modules/codemirror/lib/codemirror.js')
 
 var dictionary = lang.words
 
+// Returns {stack, }
 const evalText = (stack0, text, cursorPosition) => {
   let stack = stack0
-  // TODO: handle cursor in middle of word.
-  // TODO: show evaluation position to user.
   const program = text.slice(0, cursorPosition).trim()
   const programWords = program === "" ? [] : program.split(/\s+/)
   console.log(programWords)
@@ -58,8 +57,14 @@ var result = document.getElementById("result")
 
 const renderEvalPosition = (success) => {
   let el = document.createElement("span")
-  el.className = "eval-position"
-  el.textContent = "👀"
+  if (success) {
+    el.className = "eval-position eval-good"
+    el.textContent = "👀"
+  } else {
+    el.className = "eval-position eval-error"
+    el.textContent = "💥"
+  }
+
   return el
 }
 
@@ -68,6 +73,7 @@ let bookmark = null;
 const showResult = () => {
   // Find close word boundary to use as eval position.
   // Going left then right means that when in middle of word, we're evaluating after it.
+  // TODO use findWordAt?
   let pos = editor.getCursor("head")
   // Do allow evaluation at very start of document.
   if (pos.line !== 0 || pos.ch !== 0) {
@@ -78,11 +84,17 @@ const showResult = () => {
   if (bookmark !== null) {
     bookmark.clear()
   }
-  let widget = renderEvalPosition(true) // TODO
-  bookmark = doc.setBookmark(pos, { widget })
 
   charPos = doc.indexFromPos(pos)
-  stack = evalText([], editor.getValue(), charPos)
+  let stack = []
+  try {
+    stack = evalText([], editor.getValue(), charPos)
+    let widget = renderEvalPosition(true)
+    bookmark = doc.setBookmark(pos, { widget })
+  } catch (e) {
+    let widget = renderEvalPosition(false)
+    bookmark = doc.setBookmark(pos, { widget })
+  }
   result.querySelector('.stack').replaceWith(renderStack(stack))
 }
 
