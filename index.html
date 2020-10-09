@@ -2,13 +2,16 @@
 
 <head>
   <meta charset="UTF-8" />
-  <script src="node_modules/browser-cjs/require.js"></script>
+  <script src="/node_modules/browser-cjs/require.js"></script>
+
+  <link rel="stylesheet" href="/node_modules/codemirror/lib/codemirror.css">
   <link href="notebook.css" rel="stylesheet" />
 </head>
 
 <body dir="auto">
   <div class="source-with-result">
-    <textarea dir="auto" class="source" id="source"> white black
+    <div class="source">
+      <textarea dir="auto" class="source" id="source"> white black
    fade slow
 blue
 swap
@@ -23,6 +26,7 @@ glue
 blue purple fade
 glue
 </textarea>
+    </div>
     <div class="result" id="result">
       <div class="before-stack"></div>
       <div class="stack"></div>

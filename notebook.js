@@ -1,4 +1,5 @@
 const lang = require("./lang.js")
+const CodeMirror = require('/node_modules/codemirror/lib/codemirror.js')
 
 var dictionary = lang.words
 
@@ -44,38 +45,25 @@ const renderStack = (stack) => {
   return el
 }
 
-var source = document.getElementById("source")
+var editor = CodeMirror.fromTextArea(
+  document.getElementById("source"),
+  {
+    autofocus: true,
+    viewportMargin: Infinity, // https://codemirror.net/demo/resize.html
+  }
+)
+var doc = editor.getDoc()
 
 var result = document.getElementById("result")
 
 const showResult = () => {
-  stack = evalText([], source.value, source.selectionStart)
+  charPos = doc.indexFromPos(editor.getCursor("head"))
+  stack = evalText([], editor.getValue(), charPos)
   result.querySelector('.stack').replaceWith(renderStack(stack))
 }
 
-const textarea = document.querySelector('textarea');
-// TODO wasteful?  https://stackoverflow.com/a/53999418/239657
-const events = [
-  'keypress',  // Every character written
-  'keyup',
-  'mousedown',  // Click down
-  'touchstart',  // Mobile
-  'input',  // Other input events
-  'paste',  // Clipboard actions
-  'cut',
-  'mousemove',  // Selection, dragging text
-  'select',  // Some browsers support this event
-  'selectstart',  // Some browsers support this event
-]
-for (let event of events) {
-  textarea.addEventListener(event, (...e) => {
-    console.log('event:', e)
-    showResult()
-  })
-}
-
-const endOfInput = textarea.value.length
-textarea.setSelectionRange(endOfInput, endOfInput)
-textarea.focus()
+editor.setCursor({ line: Infinity, ch: Infinity })
+editor.on("change", showResult)
+editor.on("cursorActivity", showResult)
 
 showResult()

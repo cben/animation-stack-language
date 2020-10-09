@@ -5,20 +5,23 @@
 .source-with-result {
     display: flex;
     flex-direction: row;
-    height: 100%;
 }
 
 .source {
     font-family: 'Courier New', Courier, monospace;
-    display: inline-block;
+    font-size: 20px;
     width: 40%;
-    height: 90%;
     vertical-align: top;
+}
+
+.CodeMirror {
+    border: 1px solid gray;
+    margin: 0.2em;
+    height: auto;
 }
 
 .result {
     width: 60%;
-    display: inline-block;
     vertical-align: top;
 }
 
