@@ -56,8 +56,32 @@ var doc = editor.getDoc()
 
 var result = document.getElementById("result")
 
+const renderEvalPosition = (success) => {
+  let el = document.createElement("span")
+  el.className = "eval-position"
+  el.textContent = "👀"
+  return el
+}
+
+let bookmark = null;
+
 const showResult = () => {
-  charPos = doc.indexFromPos(editor.getCursor("head"))
+  // Find close word boundary to use as eval position.
+  // Going left then right means that when in middle of word, we're evaluating after it.
+  let pos = editor.getCursor("head")
+  // Do allow evaluation at very start of document.
+  if (pos.line !== 0 || pos.ch !== 0) {
+    pos = editor.findPosH(pos, -1, "word")
+    pos = editor.findPosH(pos, 1, "word")
+  }
+
+  if (bookmark !== null) {
+    bookmark.clear()
+  }
+  let widget = renderEvalPosition(true) // TODO
+  bookmark = doc.setBookmark(pos, { widget })
+
+  charPos = doc.indexFromPos(pos)
   stack = evalText([], editor.getValue(), charPos)
   result.querySelector('.stack').replaceWith(renderStack(stack))
 }

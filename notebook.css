@@ -20,6 +20,10 @@
     height: auto;
 }
 
+.eval-position {
+    border-bottom: 2px solid skyblue;
+}
+
 .result {
     width: 60%;
     vertical-align: top;
