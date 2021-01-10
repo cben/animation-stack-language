@@ -32,7 +32,7 @@ const addLight = (c1, c2) => (
 
 // fraction between [0.0, 1.0]
 const mixLight = (c1, c2, fraction) => (
-  mapChannels2(c1, c2, (v1, v2) => v1*fraction + v2*(1-fraction))
+  mapChannels2(c1, c2, (v1, v2) => v1 * fraction + v2 * (1 - fraction))
 )
 
 // Animations
@@ -89,7 +89,7 @@ const constWord = (value) => (
 
 const fixedColor = (red, green, blue) => ({
   duration: 1.0,
-  color: time => ({red, green, blue}),
+  color: time => ({ red, green, blue }),
 })
 
 const colors = {
@@ -103,7 +103,7 @@ const colors = {
   white: fixedColor(COLOR_MAX, COLOR_MAX, COLOR_MAX),
 }
 
-for(name in colors) {
+for (name in colors) {
   words[name] = constWord(colors[name])
 }
 
@@ -192,9 +192,9 @@ words.swap = ([x, y, ...rest]) => [y, x, ...rest]
 
 words.split = stack => {
   const [anim, ...rest] = stack
-  let r = mapTime(anim, ({red, green, blue}) => ({red, green: 0, blue: 0}))
-  let g = mapTime(anim, ({red, green, blue}) => ({red: 0, green, blue: 0}))
-  let b = mapTime(anim, ({red, green, blue}) => ({red: 0, green: 0, blue}))
+  let r = mapTime(anim, ({ red, green, blue }) => ({ red, green: 0, blue: 0 }))
+  let g = mapTime(anim, ({ red, green, blue }) => ({ red: 0, green, blue: 0 }))
+  let b = mapTime(anim, ({ red, green, blue }) => ({ red: 0, green: 0, blue }))
   return [b, g, r, ...rest]
 }
 
@@ -225,9 +225,38 @@ let hebrewWords = {
   שכפל: words.copy,
 }
 
+// Semantics
+// =========
+// TODO: support calling named definitions.
+
+const initialState = (dictionary, stack) => (
+  { dictionary, stack, error: null, errorMessage: null }
+)
+
+// Evaluates a single word.
+// Errors deliberately preserve previous stack, and are cleared on next word -
+// this way when typing in the middle, only the current incomplete word is affected.
+const evalSmallStep = (state, word) => {
+  const { dictionary, stack } = state
+  if (dictionary.hasOwnProperty(word)) {
+    try {
+      const newStack = dictionary[word](stack)
+      return { dictionary, stack: newStack, error: null, errorMessage: null }
+    } catch (e) {
+      // Note this only catches exceptions immediately in the word function.
+      // Many words construct stack elements with a .color function which
+      // can explode later when called to visualize a stack element...
+      return { dictionary, stack, error: 'Exception', errorMessage: e }
+    }
+  } else {
+    // TODO: i18n error messages
+    return { dictionary, stack, error: 'NameError', errorMessage: 'מה?' }
+  }
+}
 
 module.exports = {
   COLOR_MAX, clipChannel,
   words, hebrewWords,
   getDuration,
+  initialState, evalSmallStep,
 }

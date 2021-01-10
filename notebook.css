@@ -20,12 +20,26 @@
     height: auto;
 }
 
-.eval-position.eval-good {
+.cm-word.cm-good {}
+
+.cm-word.cm-unknown {
+    text-decoration: wavy underline red;
+}
+
+.cm-word.cm-error {
+    text-decoration: underline orange;
+}
+
+.eval-position.cm-good {
     border-bottom: 2px solid skyblue;
 }
 
-.eval-position.eval-error {
+.eval-position.cm-unknown {
     border-left: 2px solid red;
+}
+
+.eval-position.cm-error {
+    border-left: 2px solid orange;
 }
 
 .result {

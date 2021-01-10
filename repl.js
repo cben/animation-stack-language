@@ -104,19 +104,21 @@ const repl = async (dictionary, stack0) => {
     prompt: PROMPT,
   })
 
-  let stack = stack0
-  await playStack(stack)
+  let state = lang.initialState(dictionary, stack0)
+  await playStack(state.stack)
 
   reader.prompt()
   reader.on('line', async w => {
     if (w == '') {
       // Allow <Enter> to re-display stack, useful after losing sight from errors and completions
-      await playStack(stack)
-    } else if (dictionary[w]) {
-      stack = dictionary[w](stack)
-      await playStack(stack)
+      await playStack(state.stack)
     } else {
-      console.error(chalk.red('מה?'))
+      state = lang.evalSmallStep(state, w)
+      if (state.error) {
+        console.error(ERROR_CHAR + ' ' + chalk.red(state.errorMessage))
+      } else {
+        await playStack(state.stack)
+      }
     }
     reader.prompt()
   })
@@ -127,16 +129,19 @@ const repl = async (dictionary, stack0) => {
 
 // TODO extract common loop from this and interactive repl()
 const evalWords = async (dictionary, stack0, program) => {
-  let stack = stack0
-  await playStack(stack)
+  let state = lang.initialState(dictionary, stack0)
+  await playStack(state.stack)
   await sleep(500)
-  for(w of program) {
+  for (w of program) {
     console.log('#', w)
-    stack = dictionary[w](stack)
-    await playStack(stack)
+    state = lang.evalSmallStep(state, w)
+    if (state.error) {
+      console.log(chalk.red(ERROR_CHAR + ' ' + state.errorMessage))
+    }
+    await playStack(state.stack)
     await sleep(500)
   }
-  return stack
+  return state.stack
 }
 
 // TEST
