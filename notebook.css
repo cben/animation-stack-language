@@ -5,20 +5,45 @@
 .source-with-result {
     display: flex;
     flex-direction: row;
-    height: 100%;
 }
 
 .source {
     font-family: 'Courier New', Courier, monospace;
-    display: inline-block;
+    font-size: 20px;
     width: 40%;
-    height: 90%;
     vertical-align: top;
+}
+
+.CodeMirror {
+    border: 1px solid gray;
+    margin: 0.2em;
+    height: auto;
+}
+
+.cm-word.cm-good {}
+
+.cm-word.cm-unknown {
+    text-decoration: wavy underline red;
+}
+
+.cm-word.cm-error {
+    text-decoration: underline orange;
+}
+
+.eval-position.cm-good {
+    border-bottom: 2px solid skyblue;
+}
+
+.eval-position.cm-unknown {
+    border-left: 2px solid red;
+}
+
+.eval-position.cm-error {
+    border-left: 2px solid orange;
 }
 
 .result {
     width: 60%;
-    display: inline-block;
     vertical-align: top;
 }
 
