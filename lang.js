@@ -76,6 +76,11 @@ const mapTime2 = (a1, a2, f) => (
 // - Error: TODO value or exception?
 //   TODO: voice message
 
+// Error handling: Guarantees a number, -1 for errors.
+const getDuration = anim => (
+  (anim && typeof anim.duration === 'number') ? anim.duration : -1
+)
+
 let words = {}
 
 const constWord = (value) => (
@@ -177,6 +182,7 @@ words.glue = binaryWord((a2, a1) => (
 ))
 
 // stack words
+// TODO error when not enough arguments.
 
 words.drop = ([x, ...rest]) => [...rest]
 words.copy = ([x, ...rest]) => [x, x, ...rest]
@@ -193,6 +199,7 @@ words.split = stack => {
 }
 
 // i18n
+// ----
 
 let hebrewWords = {
   שחור: words.black,
@@ -218,4 +225,9 @@ let hebrewWords = {
   שכפל: words.copy,
 }
 
-module.exports = { words, hebrewWords, COLOR_MAX, clipChannel };
+
+module.exports = {
+  COLOR_MAX, clipChannel,
+  words, hebrewWords,
+  getDuration,
+}
