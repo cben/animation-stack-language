@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build-for-netlify": "rm --recursive --force dist/; mkdir --parents dist/node_modules/; cp --recursive node_modules/browser-cjs dist/node_modules/; cp *.html *.js *.css dist/",
+    "build-for-netlify": "rm --recursive --force dist/; mkdir --parents dist/node_modules/; cp --recursive node_modules/browser-cjs node_modules/codemirror dist/node_modules/; cp *.html *.js *.css dist/",
     "start": "serve ."
   },
   "author": "",
