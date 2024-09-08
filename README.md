@@ -115,11 +115,25 @@ black    white    fade        white    black        fade        join            
 Visualizing processes as graphs of time is an important idea to teach in itself!
 Cf. Bret Victor's  http://worrydream.com/LadderOfAbstraction/ and http://worrydream.com/#!/MediaForThinkingTheUnthinkable .
 
+Alas, so far I've FAILED to explain this "animation" concept to my family ☹️
+
 ## Future
 
 ### Defining custom words
 
 I'm considering making it part of the UI — give you a separate editor per word — to escape the question of definition syntax.
+
+Prior art to look at:
+- Brief: concatenative refactoring https://www.youtube.com/watch?v=R3MNcA2dpts
+- Mu with collapsible calls showing stack after every op https://archive.org/details/akkartik-2min-2020-12-06 (and some prior videos)
+- Boxer.
+
+Specifically, unlike above Mu video where definitions are edited separately from the execution trace, I want to normalize editing definitions *inside an expanded call*.  
+Having some prior arguments (an "example") prepared before a call is essential for showing live values while editing a parametrized function (cf. [Babylonian-Style Programming][]); 
+having some post-processing after the call enables workflows like unit tests verifying a result, or rendering a View while working on Model logic...  
+It seems to me in-call editing could subsume various IDE functionalities that folks build for "example oriented programming" (?)
+
+[Babylonian-Style Programming]: https://arxiv.org/pdf/1902.00549
 
 ### Collaborative editing
 
