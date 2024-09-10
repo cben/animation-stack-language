@@ -28,6 +28,8 @@ const NLEDS = 150  // strip length, TODO make configurable
 // but I saw some artifacts, let's try more?  (Or was this just brigtness flicker?)
 let buf = Buffer.alloc(/*start*/1 + /*pixels*/4 * NLEDS + /*end*/Math.ceil(NLEDS))
 
+let reverse = process.env.LEDS_REVERSE === 'true'
+
 // r, g, b, brightness ∈ [0..255]
 //
 // The r,g,b values are PWM'd at high frequncy ~19.2kHz.  Brightness modulation
@@ -38,7 +40,7 @@ const setRGBb = (pixel, r, g, b, brightness) => {
   if (pixel < 0 || pixel > NLEDS) {
     throw(`setRGBb: pixel ${pixel} out of bounds [0..${NLEDS})`)
   }
-  const i = 1 + 4 * pixel
+  const i = 1 + 4 * (reverse ? NLEDS - 1 - pixel : pixel)
   buf[i] = 0xE0 | (brightness >> 3)  // 111bbbbb
   buf[i + 1] = b
   buf[i + 2] = g
