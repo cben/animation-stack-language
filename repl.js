@@ -79,7 +79,7 @@ const ledsPlayStack = async stack => {
     return
   }
   const maxDuration = Math.max(...stack.map(a => a.duration))
-  const step = 0.01
+  const step = 0.05
   // TODO: it seems white->black fades don't reach complete fade, why?
   for(let time = 0; time <= maxDuration; time += step) {
     await ledsShowStackAtTime(stack, time)
