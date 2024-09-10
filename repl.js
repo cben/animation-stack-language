@@ -105,12 +105,14 @@ const repl = async (dictionary, stack0) => {
     output: process.stdout,
     terminal: false
   })
-  reader.on('line', async w => {
-    if (dictionary[w]) {
-      stack = dictionary[w](stack)
-    } else {
-      console.error('מה?')
-    }
+  reader.on('line', async line => {
+    line.trim().split(/\s+/).forEach(w => {
+      if (dictionary[w]) {
+        stack = dictionary[w](stack)
+      } else {
+        console.error(`${w}: מה?`)
+      }
+    })
     await playStack(stack)
   })
 
