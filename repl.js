@@ -62,7 +62,7 @@ const ledsShowStackAtTime = async (stack, time) => {
       const color = anim.color(time <= anim.duration ? time : 0)
       // TODO: leds are far too bright, not similar to colors on screen
       // (e.g. dark brown on screen is still quite bright pink on leds)
-      leds.setRGBb(i, lang.clipChannel(color.red), lang.clipChannel(color.green), lang.clipChannel(color.blue), 255)
+      leds.setRGBb(i, lang.clipChannel(color.red), lang.clipChannel(color.green), lang.clipChannel(color.blue), BRIGHTNESS)
       //process.stdout.write(showColor(color)(' ' + i))
     } else {
       // clear to black beyond bottom of stack
