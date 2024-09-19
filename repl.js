@@ -53,21 +53,34 @@ const playAnim = async anim => {
   process.stdout.write(' '.repeat(60) + '\r')
 }
 
+const BRIGHTNESS = parseInt(process.env.LEDS_BRIGHTNESS) || 255
+
 const ledsShowStackAtTime = async (stack, time) => {
   //process.stdout.write(time + ' ')
-  for(let i = 0; i < leds.NLEDS; i++) {
-    if(i < stack.length) {
-      const anim = stack[i]
-      // animate, when done, revert to initial color
-      const color = anim.color(time <= anim.duration ? time : 0)
-      // TODO: leds are far too bright, not similar to colors on screen
-      // (e.g. dark brown on screen is still quite bright pink on leds)
-      leds.setRGBb(i, lang.clipChannel(color.red), lang.clipChannel(color.green), lang.clipChannel(color.blue), BRIGHTNESS)
+  let led = 0
+  for(let i = stack.length - 1; i >= 0; i--) {
+    const anim = stack[i]
+    // animate, when done, stay at final color
+    //const color = anim.color(Math.min(time, anim.duration))
+    // TODO: leds are far too bright, not similar to colors on screen
+    // (e.g. dark brown on screen is still quite bright pink on leds)
+    for(let t = 0; t <= anim.duration; t += 0.2) {
+      const color = anim.color(Math.min(t, anim.duration))
+      if(led < leds.NLEDS) {
+        leds.setRGBb(led++, lang.clipChannel(color.red), lang.clipChannel(color.green), lang.clipChannel(color.blue), BRIGHTNESS)
+      }
       //process.stdout.write(showColor(color)(' ' + i))
-    } else {
-      // clear to black beyond bottom of stack
-      leds.setRGBb(i, 0, 0, 0, 0)
     }
+
+    // And a bigger gap between stack items:
+    leds.setRGBb(led++, 0, 0, 0, 0)
+    leds.setRGBb(led++, 0, 0, 0, 0)
+    leds.setRGBb(led++, 0, 0, 0, 0)
+  }
+
+  // clear to black beyond bottom of stack
+  while(led < leds.NLEDS) {
+    leds.setRGBb(led++, 0, 0, 0, 0)
   }
   await leds.send()
   //process.stdout.write('\n')
@@ -84,6 +97,7 @@ const ledsPlayStack = async stack => {
   for(let time = 0; time <= maxDuration; time += step) {
     await ledsShowStackAtTime(stack, time)
     await sleep(step * 1000)
+    break //TODO
   }
 }
 
@@ -91,7 +105,8 @@ const playStack = async stack => {
   console.log(showStack(stack))
   const promises = [ledsPlayStack(stack)]
   if (stack.length > 0) {
-    promises.push(playAnim(stack[0]))
+    // TODO: for fast ingestion of long programs, skip(?) all animations while we have pending input.  
+    //promises.push(playAnim(stack[0]))
   }
   await Promise.all(promises)
 }

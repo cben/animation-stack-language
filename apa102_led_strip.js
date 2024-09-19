@@ -13,7 +13,9 @@ const spi = piSPI.initialize("/dev/spidev0.0")
 // People say 4MHz and more work fine, Pi supports powers of two up to 32MHz.
 spi.clockSpeed(1e6)
 
-const NLEDS = 150  // strip length, TODO make configurable
+//const NLEDS = 150  // strip length, TODO make configurable
+// In Maayan's room, I cut off a few leds.
+const NLEDS=136
 
 // Inspired by https://github.com/livejs/pixels-apa102 but don't want
 // to mess with ndpixels and `cwise` which does heavy voodoo.
@@ -41,6 +43,10 @@ const setRGBb = (pixel, r, g, b, brightness) => {
     throw(`setRGBb: pixel ${pixel} out of bounds [0..${NLEDS})`)
   }
   const i = 1 + 4 * (reverse ? NLEDS - 1 - pixel : pixel)
+  // TODO auto brightness?
+  if(b < 16 && g < 16 && r < 16) {
+  	brightness
+  }
   buf[i] = 0xE0 | (brightness >> 3)  // 111bbbbb
   buf[i + 1] = b
   buf[i + 2] = g
