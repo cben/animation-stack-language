@@ -12,6 +12,13 @@ const sleep = milliSeconds => new Promise(resolve => setTimeout(resolve, milliSe
 
 const showColor = color => chalk.rgb(Math.round(lang.clipChannel(color.red)), Math.round(lang.clipChannel(color.green)), Math.round(lang.clipChannel(color.blue)))
 
+// bidi hack — TODO use this depending on language
+//
+// Using a visible char because invisible chars like U+200F RIGHT-TO-LEFT MARK
+// don't seem to affect pterm (Putty) which is currently bidi terminal I use.
+const RIGHT_TO_LEFT = '׃' // U+05C3 HEBREW PUNCTUATION SOF PASUQ
+const PROMPT = '؟ ' // U+061F ARABIC QUESTION MAKR
+
 const showAnim = anim => {
   let s = ''
   if(anim.duration < 0.1) {
@@ -26,7 +33,7 @@ const showAnim = anim => {
 
 const showStack = stack => (
   stack.slice().reverse().map(anim => (
-    'ע' + // bidi hack
+    RIGHT_TO_LEFT +
       ' '.repeat(20) +
       showAnim(anim) + '\n'
   )).join('')
@@ -41,7 +48,7 @@ const playAnim = async anim => {
     const pos = Math.round(time / 0.2) // position inside [.....] above
     const color = anim.color(time)
     const colored = showColor(color)
-    process.stdout.write('ע' + // bidi hack
+    process.stdout.write(RIGHT_TO_LEFT +
                          ' '.repeat(3) +
                          '(' + colored('⬤').repeat(5) + ')' + // U+2B24 BLACK LARGE CIRCLE
                          colored('-').repeat((20 + '['.length + pos) - (3 + 1 + 5 + 1)) +
@@ -118,17 +125,25 @@ const repl = async (dictionary, stack0) => {
   var reader = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
-    terminal: false
+    completer: line => (
+      [Object.keys(dictionary).filter(w => w.startsWith(line)), line]
+    ),
+    prompt: PROMPT,
   })
+  reader.prompt()
   reader.on('line', async line => {
-    line.trim().split(/\s+/).forEach(w => {
-      if (dictionary[w]) {
+    for (let w of line.trim().split(/\s+/)) {
+      if (w == '') {
+        // Allow <Enter> to re-display stack, useful after losing sight from errors and completions
+        await playStack(stack)
+      } else if (dictionary[w]) {
         stack = dictionary[w](stack)
+        await playStack(stack)
       } else {
         console.error(`${w}: מה?`)
       }
-    })
-    await playStack(stack)
+      reader.prompt()
+    }
   })
 
   return stack // is this reachable?
