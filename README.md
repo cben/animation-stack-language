@@ -30,12 +30,12 @@ One command per line.  No way to go back and edit previous commands.
 git clone https://github.com/cben/animation-stack-language
 cd animation-stack-language
 yarn install
-node repl.js
+LANG=en node repl.js
 ```
 
-Currently defaults to Hebrew.  Press TAB to list of known commands.  You'll want a terminal that supports both right-to-left text and True Color attributes.  `pterm` (port of Putty from windows) worked best for me on Fedora; `konsole` is also not bad.
+Press TAB to list of known commands.  You'll want a terminal that supports both True Color attributes and right-to-left text (for Hebrew).  `pterm` (port of Putty from windows) worked best for me on Fedora; `konsole` is also not bad.
 
-* For English, edit the last line of repl.js from `lang.hebrewWords` to use `lang.words`, although the prompt uses some right-to-left chars.
+* Currently supports English and Hebrew; REPL language choosen by env vars e.g. `LANG=he.UTF-8 node repl.js`.
 * Translation pull requests welcome!
 
 ## Why a stack language?

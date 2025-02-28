@@ -2,7 +2,7 @@ const { initialState } = require('./lang.js')
 const lang = require('./lang.js')
 const CodeMirror = require('/node_modules/codemirror/lib/codemirror.js')
 
-var dictionary = lang.words
+var dictionary = lang.wordsByLanguage.en
 
 CodeMirror.defineMode('animation-stack-language',
   (cmConfig, modeOptions) => {

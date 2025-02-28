@@ -209,7 +209,11 @@ words.split = requireArgs(1, stack => {
 // i18n
 // ----
 
-let hebrewWords = {
+var wordsByLanguage = {
+  en: words,
+}
+
+wordsByLanguage.he = {
   שחור: words.black,
   אדום: words.red,
   צהוב: words.yellow,
@@ -232,6 +236,31 @@ let hebrewWords = {
   זרוק: words.drop,
   שכפל: words.copy,
 }
+
+const userLanguage = () => {
+  const env = globalThis.process?.env || {}
+  // navigator.language[s] defined in browser but also in NodeJS since 2023.
+  const colonSeparatedLocales = (
+    globalThis.navigator?.languages?.join(':') ||
+    globalThis.navigator?.language ||
+    // https://www.gnu.org/software/gettext/manual/html_node/Locale-Environment-Variables.html
+    env.LANGUAGES ||
+    env.LC_ALL ||
+    env.LC_MESSAGES ||
+    env.LANG
+  )
+  // Browser can reports just language e.g. 'he' but also country suffixes e.g. 'en-US',
+  // and env vars tend to also have encoding suffixes e.g. 'en_GB.UTF-8'.
+  for (const locale of colonSeparatedLocales.split(':')) {
+    const lang = locale.replace(/[-_.].*$/, '')
+    if (lang in wordsByLanguage) {
+      return lang
+    }
+  }
+  return 'en'
+}
+
+const isRightToLeft = (lang) => ['he'].includes(lang)
 
 // Semantics
 // =========
@@ -258,13 +287,13 @@ const evalSmallStep = (state, word) => {
     }
   } else {
     // TODO: i18n error messages
-    return { dictionary, stack, error: 'NameError', errorMessage: 'מה?' }
+    return { dictionary, stack, error: 'NameError', errorMessage: word }
   }
 }
 
 module.exports = {
   COLOR_MAX, clipChannel,
-  words, hebrewWords,
+  wordsByLanguage, userLanguage, isRightToLeft,
   getDuration,
   initialState, evalSmallStep,
 }
