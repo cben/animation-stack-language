@@ -8,11 +8,14 @@ langSelector.value = lang.userLanguage()
 // HACK: Executing word-by-word *as part of CodeMirror parsing*,
 // so that we retain the execution state after each word, and also highlight errors.
 
-const modeConfig = () => {
+const editorConfig = () => {
   const dictionary = lang.wordsByLanguage[langSelector.value]
   return {
-    name: 'animation-stack-language',
-    initialState: lang.initialState(dictionary, []),
+    mode: { // CM passes this into `modeOptions` 2nd arg below
+      name: 'animation-stack-language',
+      initialState: lang.initialState(dictionary, []),
+    },
+    direction: lang.isRightToLeft(langSelector.value) ? 'rtl' : 'ltr',
   }
 }
 
@@ -90,7 +93,7 @@ var editor = CodeMirror.fromTextArea(
   {
     autofocus: true,
     viewportMargin: Infinity, // https://codemirror.net/demo/resize.html
-    mode: modeConfig(),
+    ...editorConfig(),
   }
 )
 var doc = editor.getDoc()
@@ -160,7 +163,9 @@ editor.on('cursorActivity', showResult)
 editor.on('change', sendToBackend)
 
 langSelector.onchange = () => {
-  editor.setOption('mode', modeConfig())
+  for (const [name, value] of Object.entries(editorConfig())) {
+    editor.setOption(name, value)
+  }
   showResult()
   sendToBackend()
 }
