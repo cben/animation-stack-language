@@ -57,7 +57,11 @@ const renderAnim = (anim) => {
   let el = document.createElement('div')
   el.className = 'animation'
   for (let time = 0; time <= anim.duration; time += 0.2) {
-    el.append(renderColor(anim.color(time)))
+    try {
+      el.append(renderColor(anim.color(time)))
+    } catch (err) {
+      el.append('✗')
+    }
   }
   return el
 }
