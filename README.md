@@ -19,7 +19,7 @@ cd animation-stack-language
 yarn install
 yarn start
 ```
-Then open http://localhost:5000/.
+Then open http://localhost:4321/.
 
 
 ## How to run — terminal REPL

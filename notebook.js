@@ -145,13 +145,24 @@ const showResult = () => {
   result.querySelector('.stack').replaceWith(renderStack(stack))
 }
 
+// Also send whole code to backend.
+// NOT sensitive to cursor position, so you can use UI to probe execution process without disturbing the room lighting.
+const sendToBackend = () => {
+    // KLUDGE: Async, not awaiting.
+    const codeForBackend = { __lang__: langSelector.value, main: doc.getValue() }
+    fetch("/api/code", { method: "PUT", body: JSON.stringify(codeForBackend) })
+    console.log('sent to backend', codeForBackend)  
+}
+
 editor.setCursor({ line: Infinity, ch: Infinity })
 editor.on('change', showResult)
 editor.on('cursorActivity', showResult)
+editor.on('change', sendToBackend)
 
 langSelector.onchange = () => {
   editor.setOption('mode', modeConfig())
   showResult()
+  sendToBackend()
 }
 
 showResult()

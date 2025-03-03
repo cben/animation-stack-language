@@ -139,7 +139,7 @@ const evalWords = async (dictionary, stack0, program) => {
   let state = lang.initialState(dictionary, stack0)
   await playStack(state.stack)
   await sleep(500)
-  for (w of program) {
+  for (const w of program) {
     console.log('#', w)
     state = lang.evalSmallStep(state, w)
     if (state.error) {
