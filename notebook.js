@@ -2,6 +2,52 @@ const { initialState } = require('./lang.js')
 const lang = require('./lang.js')
 const CodeMirror = require('/node_modules/codemirror/lib/codemirror.js')
 
+const EXAMPLES = {
+  en: ` white black
+   fade slow
+blue
+swap
+
+red yellow fade
+yellow green fade
+glue
+green cyan fade
+glue
+cyan blue fade
+glue
+blue purple fade
+glue
+
+copy
+slow
+swap
+
+copy
+copy reverse glue`,
+  he: ` לבן שחור
+   מעבר לאט
+כחול
+החלף
+
+אדום צהוב מעבר
+צהוב ירוק מעבר
+הדבק
+ירוק תכלת מעבר
+הדבק
+תכלת כחול מעבר
+הדבק
+כחול סגול מעבר
+הדבק
+
+שכפל
+לאט
+החלף
+
+שכפל
+שכפל הפוך הדבק`,
+}
+var exampleButton = document.getElementById('example')
+
 var langSelector = document.getElementById('lang')
 
 var hasBackend = true  // until proven otherwise
@@ -176,6 +222,13 @@ const initEditor = () => {
     for (const [name, value] of Object.entries(editorConfig())) {
       editor.setOption(name, value)
     }
+    showResult()
+    sendToBackend()
+  }
+
+  exampleButton.onclick = () => {
+    doc.setValue(EXAMPLES[langSelector.value])
+    editor.setCursor({ line: Infinity, ch: Infinity }) // end of doc
     showResult()
     sendToBackend()
   }
