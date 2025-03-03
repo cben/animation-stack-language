@@ -103,15 +103,21 @@ const colors = {
   white: fixedColor(COLOR_MAX, COLOR_MAX, COLOR_MAX),
 }
 
-for (name in colors) {
+for (const name in colors) {
   words[name] = constWord(colors[name])
 }
 
-// TODO: stack manipulation helpers — do I need a Stack class with methods?
-// TODO: error for not enough arguments
+const requireArgs = (arity, stackFunction) => stack => {
+  if (stack.length < arity) {
+    const plural = arity === 1 ? "arg" : "args"
+    throw new Error(`Need ${arity} ${plural}, got ${stack.length}.`)
+  }
+  return stackFunction(stack)
+}
 
-const unaryWord = unaryFunc => (
+const unaryWord = unaryFunc => requireArgs(1,
   stack => {
+    requireArgs(2)
     const [x, ...rest] = stack
     return [unaryFunc(x), ...rest]
   }
@@ -146,8 +152,11 @@ words.light = unaryWord(a => mapTime(a, c => mapChannels1(c, x => x * 2)))
 // - both dark and light reduce saturation!
 //words.light = unaryWord(a => mapTime(a, c => mixLight(c, colors.white, 0.5)))
 
-const binaryWord = binaryFunc => (
+const binaryWord = binaryFunc => requireArgs(2,
   stack => {
+    if (stack.length < 2) {
+      throw new Error(`need 2 args, got ${stack.length}`)
+    }
     const [x, y, ...rest] = stack
     // TODO order?
     return [binaryFunc(x, y), ...rest]
@@ -182,21 +191,20 @@ words.glue = binaryWord((a2, a1) => (
 ))
 
 // stack words
-// TODO error when not enough arguments.
 
-words.drop = ([x, ...rest]) => [...rest]
-words.copy = ([x, ...rest]) => [x, x, ...rest]
-words.swap = ([x, y, ...rest]) => [y, x, ...rest]
+words.drop = requireArgs(1, ([x, ...rest]) => [...rest])
+words.copy = requireArgs(1, ([x, ...rest]) => [x, x, ...rest])
+words.swap = requireArgs(2, ([x, y, ...rest]) => [y, x, ...rest])
 
 // rgbAnimation -> redAnimation greenAnimation blueAnimation
 
-words.split = stack => {
+words.split = requireArgs(1, stack => {
   const [anim, ...rest] = stack
   let r = mapTime(anim, ({ red, green, blue }) => ({ red, green: 0, blue: 0 }))
   let g = mapTime(anim, ({ red, green, blue }) => ({ red: 0, green, blue: 0 }))
   let b = mapTime(anim, ({ red, green, blue }) => ({ red: 0, green: 0, blue }))
   return [b, g, r, ...rest]
-}
+})
 
 // i18n
 // ----

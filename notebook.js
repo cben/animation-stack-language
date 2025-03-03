@@ -57,7 +57,11 @@ const renderAnim = (anim) => {
   let el = document.createElement('div')
   el.className = 'animation'
   for (let time = 0; time <= anim.duration; time += 0.2) {
-    el.append(renderColor(anim.color(time)))
+    try {
+      el.append(renderColor(anim.color(time)))
+    } catch (err) {
+      el.append('✗')
+    }
   }
   return el
 }
@@ -84,11 +88,12 @@ var doc = editor.getDoc()
 
 var result = document.getElementById('result')
 
-const renderEvalPosition = (className, textContent) => {
+const renderEvalPosition = (className, textContent, tooltip) => {
   let el = document.createElement('span')
   el.classList.add('eval-position')
   el.classList.add(className)
   el.textContent = textContent
+  el.title = tooltip
   return el
 }
 
@@ -113,10 +118,14 @@ const showResult = () => {
   const token = editor.getTokenAt(pos, true)
   if (token.state.langState.error) {
     if (token.state.langState.error === 'NameError') {
-      let widget = renderEvalPosition('cm-unknown', '📖')  // U+1F4D6 OPEN BOOK
+      let widget = renderEvalPosition(
+        'cm-unknown', '📖', // U+1F4D6 OPEN BOOK
+        token.state.langState.errorMessage)
       bookmark = doc.setBookmark(pos, { widget })
     } else {
-      let widget = renderEvalPosition('cm-error', '💥')  // U+1F4A5 COLLISION SYMBOL, double-width
+      let widget = renderEvalPosition(
+        'cm-error', '💥',  // U+1F4A5 COLLISION SYMBOL, double-width
+        token.state.langState.errorMessage)
       bookmark = doc.setBookmark(pos, { widget })
     }
   } else {
