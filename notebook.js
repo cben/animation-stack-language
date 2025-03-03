@@ -2,7 +2,19 @@ const { initialState } = require('./lang.js')
 const lang = require('./lang.js')
 const CodeMirror = require('/node_modules/codemirror/lib/codemirror.js')
 
-var dictionary = lang.wordsByLanguage.en
+var langSelector = document.getElementById('lang')
+langSelector.value = lang.userLanguage()
+
+// HACK: Executing word-by-word *as part of CodeMirror parsing*,
+// so that we retain the execution state after each word, and also highlight errors.
+
+const modeConfig = () => {
+  const dictionary = lang.wordsByLanguage[langSelector.value]
+  return {
+    name: 'animation-stack-language',
+    initialState: lang.initialState(dictionary, []),
+  }
+}
 
 CodeMirror.defineMode('animation-stack-language',
   (cmConfig, modeOptions) => {
@@ -78,10 +90,7 @@ var editor = CodeMirror.fromTextArea(
   {
     autofocus: true,
     viewportMargin: Infinity, // https://codemirror.net/demo/resize.html
-    mode: {
-      name: 'animation-stack-language',
-      initialState: lang.initialState(dictionary, []),
-    }
+    mode: modeConfig(),
   }
 )
 var doc = editor.getDoc()
@@ -139,5 +148,10 @@ const showResult = () => {
 editor.setCursor({ line: Infinity, ch: Infinity })
 editor.on('change', showResult)
 editor.on('cursorActivity', showResult)
+
+langSelector.onchange = () => {
+  editor.setOption('mode', modeConfig())
+  showResult()
+}
 
 showResult()
