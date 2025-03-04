@@ -59,17 +59,17 @@ Currently defaults to Hebrew.  Press TAB to list of known commands.  You'll want
     ```
     In weird structured postfix it'd become:
     ```
-    { ( (black, white)fade, (white, black)fade )join }twice
+    { ( (black, white)fade, (white, black)fade )glue }twice
     ```
     but there's all this punctuation to get right; in stack language it's just:
     ```
-         black  white fade   white  black fade  join  twice
+         black  white fade   white  black fade  glue  twice
     ```
 
     The price of no syntax is the structure is implicit and has to be inferred from each function's arity:
 
     ```
-    black white fade white black fade join twice
+    black white fade white black fade glue twice
     🡖-----🡖-----🡕    🡖-----🡖-----🡕
     🡖-----------------🡖---------------🡕
     🡖---------------------------------------🡕
@@ -102,11 +102,11 @@ So if I want to get rid of structure, **I need flat semantics**.  Control flow s
 We can regain a (limited) ability to express and combine behavior over time by making animations first-class values ⌚!
 
 - `fade` returns an animation which takes, say, 1 second.
-- `join` concatenates 2 animations into one.
-- `twice` = `2 times` = `dup join` just concatenates the top animation with itself.
+- `glue` concatenates 2 animations into one.
+- `twice` = `2 times` = `dup glue` just concatenates the top animation with itself.
 
 ```
-black    white    fade        white    black        fade        join             twice
+black    white    fade        white    black        fade        glue             twice
      [█]      [ ]     [█▓▒░ ]      [ ]      [█]         [ ░▒▓█]     [█▓▒░  ░▒▓█]      [█▓▒░  ░▒▓██▓▒░  ░▒▓█]
               [█]                  [█▓▒░ ]  [ ]         [█▓▒░ ]
                                             [█▓▒░ ]
