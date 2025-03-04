@@ -1,11 +1,11 @@
 {
-  "name": "yeelight",
+  "name": "animation-stack-language",
   "version": "0.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
     "build-for-netlify": "rm --recursive --force dist/; mkdir --parents dist/node_modules/; cp --recursive node_modules/browser-cjs node_modules/codemirror dist/node_modules/; cp *.html *.js *.css dist/",
-    "start": "serve ."
+    "start": "node server.js"
   },
   "author": "",
   "license": "ISC",
@@ -13,6 +13,7 @@
     "browser-cjs": "^1.0.3",
     "chalk": "^2.4.2",
     "codemirror": "^5.58.1",
+    "serve-handler": "^6.1.6",
     "string-width": "^4.2.0",
     "yeelight2": "^1.3.5"
   },

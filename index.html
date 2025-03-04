@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 
 <head>
@@ -11,32 +12,16 @@
 <body dir="auto">
   <div class="source-with-result">
     <div class="source">
-      <textarea dir="auto" class="source" id="source"> white black
-   fade slow
-blue
-swap
-
-red yellow fade
-yellow green fade 
-glue
-green cyan fade
-glue
-cyan blue fade
-glue
-blue purple fade
-glue
-
-copy
-slow
-swap
-
-copy
-copy reverse glue
-</textarea>
+      🌍<select name="lang" id="lang">
+        <option value="he">Hebrew (עברית)</option>
+        <option value="en">English</option>
+      </select>
+      <button id="example">↡🌈 Example↡</button>
+      <textarea dir="auto" class="source" id="source"></textarea>
     </div>
     <div class="result" id="result">
       <div class="before-stack"></div>
-      <div class="stack"></div>
+      <div class="stack">⏳</div>
       <div class="after-stack"></div>
     </div>
   </div>
