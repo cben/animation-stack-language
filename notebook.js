@@ -1,4 +1,3 @@
-const { initialState } = require('./lang.js')
 const lang = require('./lang.js')
 const CodeMirror = require('/node_modules/codemirror/lib/codemirror.js')
 
@@ -89,7 +88,7 @@ CodeMirror.defineMode('animation-stack-language',
         }
         let m = stream.match(/^\S+/)
         if (m.length > 0) {
-          [word] = m
+          const [word] = m
           modeState.langState = lang.evalSmallStep(modeState.langState, word)
           if (modeState.langState.error) {
             if (modeState.langState.error === 'NameError') {
@@ -149,7 +148,7 @@ const renderEvalPosition = (className, textContent, tooltip) => {
   return el
 }
 
-let bookmark = null;
+let bookmark = null
 
 const showResult = () => {
   // Find close word boundary to use as eval position.
@@ -166,7 +165,7 @@ const showResult = () => {
     bookmark.clear()
   }
 
-  charPos = doc.indexFromPos(pos)
+  window.charPos = doc.indexFromPos(pos)
   const token = editor.getTokenAt(pos, true)
   if (token.state.langState.error) {
     if (token.state.langState.error === 'NameError') {
@@ -176,12 +175,12 @@ const showResult = () => {
       bookmark = doc.setBookmark(pos, { widget })
     } else {
       let widget = renderEvalPosition(
-        'cm-error', '💥',  // U+1F4A5 COLLISION SYMBOL, double-width
+        'cm-error', '💥', // U+1F4A5 COLLISION SYMBOL, double-width
         token.state.langState.errorMessage)
       bookmark = doc.setBookmark(pos, { widget })
     }
   } else {
-    let widget = renderEvalPosition('cm-good', '👀')  // U+1F440 EYES
+    let widget = renderEvalPosition('cm-good', '👀') // U+1F440 EYES
     bookmark = doc.setBookmark(pos, { widget })
   }
   const stack = token.state.langState.stack
@@ -194,7 +193,7 @@ const sendToBackend = () => {
   if (hasBackend) {
     // KLUDGE: Async, not awaiting.
     const codeForBackend = { __lang__: langSelector.value, main: doc.getValue() }
-    fetch("/api/code", { method: "PUT", body: JSON.stringify(codeForBackend) })
+    fetch('/api/code', { method: 'PUT', body: JSON.stringify(codeForBackend) })
     console.log('sent to backend', codeForBackend)
   }
 }
@@ -239,9 +238,9 @@ const initEditor = () => {
 // Try loading last executed code from server.
 // Can fail if no backend running, just static netlify.
 // Wait either way before setting up editor to avoid race conditions.
-fetch("/api/code", { mode: 'no-cors' })
+fetch('/api/code', { mode: 'no-cors' })
   .then((response) => {
-    if (response.status != 200) {
+    if (response.status !== 200) {
       throw new Error(`${response.status} ${response.statusText}`)
     }
     return response.json().then((result) => {

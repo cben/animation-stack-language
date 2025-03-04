@@ -116,7 +116,7 @@ const repl = async (dictionary, stack0) => {
 
   reader.prompt()
   reader.on('line', async w => {
-    if (w == '') {
+    if (w === '') {
       // Allow <Enter> to re-display stack, useful after losing sight from errors and completions
       await playStack(state.stack)
     } else {
