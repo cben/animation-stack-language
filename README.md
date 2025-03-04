@@ -6,6 +6,38 @@ Ofek reads well and writes, Maayan doesn't quite read yet.
 I want not only to teach some coding but also to _encourage literacy_.
 I want a "CLI" where typing gives them some magic power, specifically controlling the RGB light in their room.
 
+## UI: https://animation-stack-language.netlify.app/
+
+⚠ Experimental ^_^.
+
+Shows stack at current cursor position, updated on any edit / cursor movement (BUG: only when placed between words).
+
+Locally:
+```sh
+git clone https://github.com/cben/animation-stack-language
+cd animation-stack-language
+yarn install
+yarn start
+```
+Then open http://localhost:5000/.
+
+
+## How to run — terminal REPL
+
+One command per line.  No way to go back and edit previous commands.
+
+```sh
+git clone https://github.com/cben/animation-stack-language
+cd animation-stack-language
+yarn install
+node repl.js
+```
+
+Currently defaults to Hebrew.  Press TAB to list of known commands.  You'll want a terminal that supports both right-to-left text and True Color attributes.  `pterm` (port of Putty from windows) worked best for me on Fedora; `konsole` is also not bad.
+
+* For English, edit the last line of repl.js from `lang.hebrewWords` to use `lang.words`, although the prompt uses some right-to-left chars.
+* Translation pull requests welcome!
+
 ## Why a stack language?
 
  1. The notional machine is _extremely_ simple and transparent.
@@ -14,19 +46,25 @@ I want a "CLI" where typing gives them some magic power, specifically controllin
     e.g. the [double-headed `swap` dragon][1] whose one head grabs the top item off the stack,
     second head grabs the next item, then they put them back in reverse order.
 
-    [1] https://www.forth.com/starting-forth/2-stack-manipulation-operators-arithmetic/#SWAP
+    [1]: https://www.forth.com/starting-forth/2-stack-manipulation-operators-arithmetic/#SWAP
 
-    The price of simple machines, is they're extremely _imperative_ & descructive.
+    The price of simple machines, is they're extremely _imperative_ & destructive.
     Many actions _consume_ a 1 or 2 last produced values off the stack, and if that's not what you wanted, bummer 💣...
 
  2. No structured syntax to learn/understand!
 
-    In a typical language with nested syntax you could implement blinking as
-    `twice { fade(black, white) ; fade(white, black) }`.
+    In a typical language with nested syntax you could implement blinking as:
+    ```
+    twice { fade(black, white) ; fade(white, black) }
+    ```
     In weird structured postfix it'd become:
-    `{ ( (black, white)fade, (white, black)fade )join }twice`
+    ```
+    { ( (black, white)fade, (white, black)fade )join }twice
+    ```
     but there's all this punctuation to get right; in stack language it's just:
-    `     black  white fade   white  black fade  join  twice`
+    ```
+         black  white fade   white  black fade  join  twice
+    ```
 
     The price of no syntax is the structure is implicit and has to be inferred from each function's arity:
 
@@ -76,3 +114,24 @@ black    white    fade        white    black        fade        join            
 
 Visualizing processes as graphs of time is an important idea to teach in itself!
 Cf. Bret Victor's  http://worrydream.com/LadderOfAbstraction/ and http://worrydream.com/#!/MediaForThinkingTheUnthinkable .
+
+## Future
+
+### Defining custom words
+
+I'm considering making it part of the UI — give you a separate editor per word — to escape the question of definition syntax.
+
+### Collaborative editing
+
+I want to plug this into something like firepad / Yjs to support remote coding sessions.
+
+### New types: vectors / graphics
+
+I want to progress into graphics and possibly even simple games.
+=> The stack element type will likely change to vectors / pictures.
+
+Not entirely unlike turtle graphics, but with explicit operators to combine pictures by movement / rotation / scaling / overlaying / intersections?
+
+#### Interaction?!?
+
+I have some crazy ideas about how to represend input during games as appending words to definitions...  Pro: would work over collaborative editor for "multiplayer" (let's say step-based games only).  Con: crazy :-P.  Not sure at all yet if it's viable and whether it'll mix with current idea that stack elements are an animation over time...

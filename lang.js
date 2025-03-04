@@ -32,7 +32,7 @@ const addLight = (c1, c2) => (
 
 // fraction between [0.0, 1.0]
 const mixLight = (c1, c2, fraction) => (
-  mapChannels2(c1, c2, (v1, v2) => v1*fraction + v2*(1-fraction))
+  mapChannels2(c1, c2, (v1, v2) => v1 * fraction + v2 * (1 - fraction))
 )
 
 // Animations
@@ -76,6 +76,11 @@ const mapTime2 = (a1, a2, f) => (
 // - Error: TODO value or exception?
 //   TODO: voice message
 
+// Error handling: Guarantees a number, -1 for errors.
+const getDuration = anim => (
+  (anim && typeof anim.duration === 'number') ? anim.duration : -1
+)
+
 let words = {}
 
 const constWord = (value) => (
@@ -84,10 +89,10 @@ const constWord = (value) => (
 
 const fixedColor = (red, green, blue) => ({
   duration: 1.0,
-  color: time => ({red, green, blue}),
+  color: time => ({ red, green, blue }),
 })
 
-colors = {
+const colors = {
   black: fixedColor(0, 0, 0),
   red: fixedColor(COLOR_MAX, 0, 0),
   yellow: fixedColor(COLOR_MAX, COLOR_MAX, 0),
@@ -98,15 +103,21 @@ colors = {
   white: fixedColor(COLOR_MAX, COLOR_MAX, COLOR_MAX),
 }
 
-for(name in colors) {
+for (const name in colors) {
   words[name] = constWord(colors[name])
 }
 
-// TODO: stack manipulation helpers — do I need a Stack class with methods?
-// TODO: error for not enough arguments
+const requireArgs = (arity, stackFunction) => stack => {
+  if (stack.length < arity) {
+    const plural = arity === 1 ? "arg" : "args"
+    throw new Error(`Need ${arity} ${plural}, got ${stack.length}.`)
+  }
+  return stackFunction(stack)
+}
 
-const unaryWord = unaryFunc => (
+const unaryWord = unaryFunc => requireArgs(1,
   stack => {
+    requireArgs(2)
     const [x, ...rest] = stack
     return [unaryFunc(x), ...rest]
   }
@@ -141,8 +152,11 @@ words.light = unaryWord(a => mapTime(a, c => mapChannels1(c, x => x * 2)))
 // - both dark and light reduce saturation!
 //words.light = unaryWord(a => mapTime(a, c => mixLight(c, colors.white, 0.5)))
 
-const binaryWord = binaryFunc => (
+const binaryWord = binaryFunc => requireArgs(2,
   stack => {
+    if (stack.length < 2) {
+      throw new Error(`need 2 args, got ${stack.length}`)
+    }
     const [x, y, ...rest] = stack
     // TODO order?
     return [binaryFunc(x, y), ...rest]
@@ -178,23 +192,24 @@ words.glue = binaryWord((a2, a1) => (
 
 // stack words
 
-words.drop = ([x, ...rest]) => [...rest]
-words.copy = ([x, ...rest]) => [x, x, ...rest]
-words.swap = ([x, y, ...rest]) => [y, x, ...rest]
+words.drop = requireArgs(1, ([x, ...rest]) => [...rest])
+words.copy = requireArgs(1, ([x, ...rest]) => [x, x, ...rest])
+words.swap = requireArgs(2, ([x, y, ...rest]) => [y, x, ...rest])
 
 // rgbAnimation -> redAnimation greenAnimation blueAnimation
 
-words.split = stack => {
+words.split = requireArgs(1, stack => {
   const [anim, ...rest] = stack
-  let r = mapTime(anim, ({red, green, blue}) => ({red, green: 0, blue: 0}))
-  let g = mapTime(anim, ({red, green, blue}) => ({red: 0, green, blue: 0}))
-  let b = mapTime(anim, ({red, green, blue}) => ({red: 0, green: 0, blue}))
+  let r = mapTime(anim, ({ red, green, blue }) => ({ red, green: 0, blue: 0 }))
+  let g = mapTime(anim, ({ red, green, blue }) => ({ red: 0, green, blue: 0 }))
+  let b = mapTime(anim, ({ red, green, blue }) => ({ red: 0, green: 0, blue }))
   return [b, g, r, ...rest]
-}
+})
 
 // i18n
+// ----
 
-hebrewWords = {
+let hebrewWords = {
   שחור: words.black,
   אדום: words.red,
   צהוב: words.yellow,
@@ -218,4 +233,38 @@ hebrewWords = {
   שכפל: words.copy,
 }
 
-module.exports = { words, hebrewWords, COLOR_MAX, clipChannel };
+// Semantics
+// =========
+// TODO: support calling named definitions.
+
+const initialState = (dictionary, stack) => (
+  { dictionary, stack, error: null, errorMessage: null }
+)
+
+// Evaluates a single word.
+// Errors deliberately preserve previous stack, and are cleared on next word -
+// this way when typing in the middle, only the current incomplete word is affected.
+const evalSmallStep = (state, word) => {
+  const { dictionary, stack } = state
+  if (dictionary.hasOwnProperty(word)) {
+    try {
+      const newStack = dictionary[word](stack)
+      return { dictionary, stack: newStack, error: null, errorMessage: null }
+    } catch (e) {
+      // Note this only catches exceptions immediately in the word function.
+      // Many words construct stack elements with a .color function which
+      // can explode later when called to visualize a stack element...
+      return { dictionary, stack, error: 'Exception', errorMessage: e }
+    }
+  } else {
+    // TODO: i18n error messages
+    return { dictionary, stack, error: 'NameError', errorMessage: 'מה?' }
+  }
+}
+
+module.exports = {
+  COLOR_MAX, clipChannel,
+  words, hebrewWords,
+  getDuration,
+  initialState, evalSmallStep,
+}

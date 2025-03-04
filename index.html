@@ -1,0 +1,47 @@
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <script src="/node_modules/browser-cjs/require.js"></script>
+
+  <link rel="stylesheet" href="/node_modules/codemirror/lib/codemirror.css">
+  <link href="notebook.css" rel="stylesheet" />
+</head>
+
+<body dir="auto">
+  <div class="source-with-result">
+    <div class="source">
+      <textarea dir="auto" class="source" id="source"> white black
+   fade slow
+blue
+swap
+
+red yellow fade
+yellow green fade 
+glue
+green cyan fade
+glue
+cyan blue fade
+glue
+blue purple fade
+glue
+
+copy
+slow
+swap
+
+copy
+copy reverse glue
+</textarea>
+    </div>
+    <div class="result" id="result">
+      <div class="before-stack"></div>
+      <div class="stack"></div>
+      <div class="after-stack"></div>
+    </div>
+  </div>
+
+  <script src="notebook.js"></script>
+</body>
+
+</html>

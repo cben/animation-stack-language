@@ -7,9 +7,11 @@ const leds = require('./apa102_led_strip')
 
 const readline = require('readline')
 const chalk = require('chalk')
+const stringWidth = require('string-width')
 
 const sleep = milliSeconds => new Promise(resolve => setTimeout(resolve, milliSeconds))
 
+// Returns a function from text to colored text.
 const showColor = color => chalk.rgb(Math.round(lang.clipChannel(color.red)), Math.round(lang.clipChannel(color.green)), Math.round(lang.clipChannel(color.blue)))
 
 // bidi hack — TODO use this depending on language
@@ -17,25 +19,38 @@ const showColor = color => chalk.rgb(Math.round(lang.clipChannel(color.red)), Ma
 // Using a visible char because invisible chars like U+200F RIGHT-TO-LEFT MARK
 // don't seem to affect pterm (Putty) which is currently bidi terminal I use.
 const RIGHT_TO_LEFT = '׃' // U+05C3 HEBREW PUNCTUATION SOF PASUQ
-const PROMPT = '؟ ' // U+061F ARABIC QUESTION MAKR
+const PROMPT = '؟ ' // U+061F ARABIC QUESTION MARK
+
+const ERROR_CHAR = '✗' // U+2717 BALLOT X
 
 const showAnim = anim => {
   let s = ''
-  if(anim.duration < 0.1) {
-    s = showColor(anim.color(0))('❙') // U+2759 MEDIUM VERTICAL BAR
+  const duration = lang.getDuration(anim)
+  if (duration < 0.1) {
+    try {
+      s = showColor(anim.color(0))('❙') // U+2759 MEDIUM VERTICAL BAR
+    } catch (e) {
+      s = chalk.red(ERROR_CHAR)
+    }
   } else {
-    for(let time = 0; time <= anim.duration; time += 0.2) {
-      s += showColor(anim.color(time))('█') // U+2588 FULL BLOCK
+    for (let time = 0; time <= duration; time += 0.2) {
+      try {
+        s += showColor(anim.color(time))('█') // U+2588 FULL BLOCK
+      } catch (e) {
+        s += chalk.red(ERROR_CHAR)
+      }
     }
   }
-  return('[' + s + ']')
+  return ('[' + s + ']')
 }
+
+const ANIM_INDENT = 20
 
 const showStack = stack => (
   stack.slice().reverse().map(anim => (
     RIGHT_TO_LEFT +
-      ' '.repeat(20) +
-      showAnim(anim) + '\n'
+    ' '.repeat(ANIM_INDENT) +
+    showAnim(anim) + '\n'
   )).join('')
 )
 
@@ -43,21 +58,37 @@ const showStack = stack => (
 // passage of time, instead of each one doing independent sleep().
 
 const playAnim = async anim => {
+  const duration = lang.getDuration(anim)
+  const animWidth = stringWidth(showAnim(anim))
   const step = 0.05
-  for(let time = 0; time <= anim.duration; time += step) {
-    const pos = Math.round(time / 0.2) // position inside [.....] above
-    const color = anim.color(time)
-    const colored = showColor(color)
+  for (let time = 0; time <= duration; time += step) {
+    let colored, bulbChar, errorMessage
+    try {
+      const color = anim.color(time)
+      colored = showColor(color)
+      bulbChar = '⬤'.repeat(6)  // U+2B24 BLACK LARGE CIRCLE
+      errorMessage = ''
+    } catch (e) {
+      colored = char => char
+      bulbChar = '💥'.repeat(3) // U+1F4A5 COLLISION SYMBOL, double-width
+      errorMessage = chalk.red(ERROR_CHAR + ' ' + e)
+    }
+    const bulb = ' '.repeat(3) + '(' + colored(bulbChar) + ')'
+
+    //                     [██████████]
+    // (⬤⬤⬤⬤⬤⬤)------------^       ✗ errorMessage
+    const posInAnim = Math.round(time / 0.2)
     process.stdout.write(RIGHT_TO_LEFT +
-                         ' '.repeat(3) +
-                         '(' + colored('⬤').repeat(5) + ')' + // U+2B24 BLACK LARGE CIRCLE
-                         colored('-').repeat((20 + '['.length + pos) - (3 + 1 + 5 + 1)) +
-                         '^' +
-                         '\r')
+      bulb +
+      colored('-').repeat(-stringWidth(bulb) + ANIM_INDENT + '['.length + posInAnim) +
+      '^' +
+      ' '.repeat(-(posInAnim + '^'.length) + animWidth + 2) +
+      errorMessage +
+      '\r')
     await sleep(step * 1000)
   }
   //process.stdout.write('\n')
-  process.stdout.write(' '.repeat(60) + '\r')
+  process.stdout.write(' '.repeat(ANIM_INDENT + animWidth) + '\r')
 }
 
 const BRIGHTNESS = parseInt(process.env.LEDS_BRIGHTNESS) || 255
@@ -119,48 +150,55 @@ const playStack = async stack => {
 }
 
 const repl = async (dictionary, stack0) => {
-  let stack = stack0
-  await playStack(stack)
-
+  const allCompletions = Object.keys(dictionary).sort()
   var reader = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
     completer: line => (
-      [Object.keys(dictionary).filter(w => w.startsWith(line)), line]
+      [allCompletions.filter(w => w.startsWith(line)), line]
     ),
     prompt: PROMPT,
   })
+
+  let state = lang.initialState(dictionary, stack0)
+  await playStack(state.stack)
+
   reader.prompt()
   reader.on('line', async line => {
     for (let w of line.trim().split(/\s+/)) {
-      if (w == '') {
-        // Allow <Enter> to re-display stack, useful after losing sight from errors and completions
-        await playStack(stack)
-      } else if (dictionary[w]) {
-        stack = dictionary[w](stack)
-        await playStack(stack)
-      } else {
-        console.error(`${w}: מה?`)
-      }
-      reader.prompt()
+	    if (w == '') {
+	      // Allow <Enter> to re-display stack, useful after losing sight from errors and completions
+	      await playStack(state.stack)
+	    } else {
+	      state = lang.evalSmallStep(state, w)
+	      if (state.error) {
+	        console.error(ERROR_CHAR + ' ' + chalk.red(state.errorMessage))
+	      } else {
+	        await playStack(state.stack)
+	      }
+	   }
     }
   })
 
-  return stack // is this reachable?
+  // would be nice to return final state, but all evaluation
+  // happens async in reader callback after we return. 
 }
 
 // TODO extract common loop from this and interactive repl()
 const evalWords = async (dictionary, stack0, program) => {
-  let stack = stack0
-  await playStack(stack)
+  let state = lang.initialState(dictionary, stack0)
+  await playStack(state.stack)
   await sleep(500)
-  for(w of program) {
+  for (w of program) {
     console.log('#', w)
-    stack = dictionary[w](stack)
-    await playStack(stack)
+    state = lang.evalSmallStep(state, w)
+    if (state.error) {
+      console.log(chalk.red(ERROR_CHAR + ' ' + state.errorMessage))
+    }
+    await playStack(state.stack)
     await sleep(500)
   }
-  return stack
+  return state.stack
 }
 
 // TEST
@@ -168,9 +206,10 @@ const evalWords = async (dictionary, stack0, program) => {
 // todo move somewhere
 
 const test = async () => {
+  // test error handling.
+  await evalWords(lang.words, [], ['fade', 'yellow', 'fade', 'swap', 'cyan', 'purple', 'fade', 'swap', 'swap'])
   await evalWords(lang.words, [], ['black', 'white',  'fade', 'white', 'black', 'fade', 'swap', 'glue'])
-
-  await evalWords(lang.words, [], ['red', 'green',  'fade', 'green', 'blue', 'fade', 'slow', 'slow', 'glue', 'fast'])
+  await evalWords(lang.words, [], ['red', 'green', 'fade', 'green', 'blue', 'fade', 'slow', 'slow', 'glue', 'fast'])
 }
 
 //test()
