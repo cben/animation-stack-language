@@ -14,12 +14,19 @@ const sleep = milliSeconds => new Promise(resolve => setTimeout(resolve, milliSe
 // Returns a function from text to colored text.
 const showColor = color => chalk.rgb(Math.round(lang.clipChannel(color.red)), Math.round(lang.clipChannel(color.green)), Math.round(lang.clipChannel(color.blue)))
 
-// bidi hack — TODO use this depending on language
+// bidi hack
 //
-// Using a visible char because invisible chars like U+200F RIGHT-TO-LEFT MARK
-// don't seem to affect pterm (Putty) which is currently bidi terminal I use.
-const RIGHT_TO_LEFT = '׃' // U+05C3 HEBREW PUNCTUATION SOF PASUQ
-const PROMPT = '؟ ' // U+061F ARABIC QUESTION MARK
+const LANG = lang.userLanguage()
+let PROMPT, DIRECTION
+if (lang.isRightToLeft(LANG)) {
+  PROMPT = '؟ ' // U+061F ARABIC QUESTION MARK
+  // Using a visible char because invisible chars like U+200F RIGHT-TO-LEFT MARK
+  // don't seem to affect pterm (Putty) which is currently bidi terminal I use.
+  DIRECTION = '׃' // U+05C3 HEBREW PUNCTUATION SOF PASUQ
+} else {
+  PROMPT = '? '
+  DIRECTION = ' '
+}
 
 const ERROR_CHAR = '✗' // U+2717 BALLOT X
 
@@ -48,7 +55,7 @@ const ANIM_INDENT = 20
 
 const showStack = stack => (
   stack.slice().reverse().map(anim => (
-    RIGHT_TO_LEFT +
+    DIRECTION +
     ' '.repeat(ANIM_INDENT) +
     showAnim(anim) + '\n'
   )).join('')
@@ -78,7 +85,7 @@ const playAnim = async anim => {
     //                     [██████████]
     // (⬤⬤⬤⬤⬤⬤)------------^       ✗ errorMessage
     const posInAnim = Math.round(time / 0.2)
-    process.stdout.write(RIGHT_TO_LEFT +
+    process.stdout.write(DIRECTION +
       bulb +
       colored('-').repeat(-stringWidth(bulb) + ANIM_INDENT + '['.length + posInAnim) +
       '^' +
@@ -166,17 +173,17 @@ const repl = async (dictionary, stack0) => {
   reader.prompt()
   reader.on('line', async line => {
     for (let w of line.trim().split(/\s+/)) {
-	    if (w == '') {
-	      // Allow <Enter> to re-display stack, useful after losing sight from errors and completions
-	      await playStack(state.stack)
-	    } else {
-	      state = lang.evalSmallStep(state, w)
-	      if (state.error) {
-	        console.error(ERROR_CHAR + ' ' + chalk.red(state.errorMessage))
-	      } else {
-	        await playStack(state.stack)
-	      }
-	   }
+      if (w == '') {
+	    // Allow <Enter> to re-display stack, useful after losing sight from errors and completions
+	    await playStack(state.stack)
+	  } else {
+	    state = lang.evalSmallStep(state, w)
+        if (state.error) {
+          console.error(`${ERROR_CHAR} ${state.error}: ${state.errorMessage}`)
+        } else {
+          await playStack(state.stack)
+        }
+      }
     }
   })
 
@@ -189,11 +196,11 @@ const evalWords = async (dictionary, stack0, program) => {
   let state = lang.initialState(dictionary, stack0)
   await playStack(state.stack)
   await sleep(500)
-  for (w of program) {
+  for (const w of program) {
     console.log('#', w)
     state = lang.evalSmallStep(state, w)
     if (state.error) {
-      console.log(chalk.red(ERROR_CHAR + ' ' + state.errorMessage))
+      console.log(chalk.red(`${ERROR_CHAR} ${state.error}: ${state.errorMessage}`))
     }
     await playStack(state.stack)
     await sleep(500)
@@ -206,11 +213,12 @@ const evalWords = async (dictionary, stack0, program) => {
 // todo move somewhere
 
 const test = async () => {
+  const dictionary = lang.wordsByLanguage.en
   // test error handling.
-  await evalWords(lang.words, [], ['fade', 'yellow', 'fade', 'swap', 'cyan', 'purple', 'fade', 'swap', 'swap'])
-  await evalWords(lang.words, [], ['black', 'white',  'fade', 'white', 'black', 'fade', 'swap', 'glue'])
-  await evalWords(lang.words, [], ['red', 'green', 'fade', 'green', 'blue', 'fade', 'slow', 'slow', 'glue', 'fast'])
+  await evalWords(dictionary, [], ['fade', 'yellow', 'fade', 'swap', 'cyan', 'purple', 'fade', 'swap', 'XYZ', 'swap'])
+  await evalWords(dictionary, [], ['black', 'white', 'fade', 'white', 'black', 'fade', 'swap', 'glue'])
+  await evalWords(dictionary, [], ['red', 'green', 'fade', 'green', 'blue', 'fade', 'slow', 'slow', 'glue', 'fast'])
 }
 
 //test()
-repl(lang.hebrewWords, [])
+repl(lang.wordsByLanguage[lang.userLanguage()], [])
