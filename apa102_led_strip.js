@@ -40,7 +40,8 @@ let reverse = process.env.LEDS_REVERSE === 'true'
 // range towards blacks...
 const setRGBb = (pixel, r, g, b, brightness) => { 
   if (pixel < 0 || pixel > NLEDS) {
-    throw(`setRGBb: pixel ${pixel} out of bounds [0..${NLEDS})`)
+    //throw
+    console.log(`setRGBb: pixel ${pixel} out of bounds [0..${NLEDS})`)
   }
   const i = 1 + 4 * (reverse ? NLEDS - 1 - pixel : pixel)
   // TODO auto brightness?
