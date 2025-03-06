@@ -54,6 +54,20 @@ var hasBackend = true  // until proven otherwise
 // Set by initEditor() at the end...
 var editor, doc
 
+var dictionary = document.getElementById('dictionary')
+
+const showDictionary = () => {
+  const words = Object.keys(lang.wordsByLanguage[langSelector.value])
+  //words.sort() — actually no, lang.js definition order is logical.
+  dictionary.replaceChildren(
+    ...words.map(w => {
+      let el = document.createElement('span')
+      el.innerText = ' ' + w + ' ' // spaces help when copy-pasted
+      return el
+    })
+  )
+}
+
 // HACK: Executing word-by-word *as part of CodeMirror parsing*,
 // so that we retain the execution state after each word, and also highlight errors.
 
@@ -223,6 +237,7 @@ const initEditor = () => {
     }
     showResult()
     sendToBackend()
+    showDictionary()
   }
 
   exampleButton.onclick = () => {
@@ -232,6 +247,7 @@ const initEditor = () => {
     sendToBackend()
   }
 
+  showDictionary()
   showResult()
 }
 
