@@ -1,16 +1,13 @@
 # A stack language REPL for kids
 
-My kids are 4yo and 6yo (as I started working on this), have a lot of experience with tablets but none with textual interfaces.
-Ofek reads well and writes, Maayan doesn't quite read yet.
+My kids were 4yo and 6yo (as I started working on this), had a lot of experience with tablets but none with textual interfaces.  Ofek reads well and writes, Maayan didn't quite read yet (back then).
 
-I want not only to teach some coding but also to _encourage literacy_.
-I want a "CLI" where typing gives them some magic power, specifically controlling the RGB light in their room.
+I wanted not only to teach some coding but also to _encourage literacy_.
+I wanted a "CLI" where typing gives them some magic power, specifically controlling the RGB light in their room.
 
 ## UI: https://animation-stack-language.netlify.app/
 
-⚠ Experimental ^_^.
-
-Shows stack at current cursor position, updated on any edit / cursor movement (BUG: only when placed between words).
+Shows stack at current cursor position, updated on any edit / cursor movement.
 
 Locally:
 ```sh
@@ -21,6 +18,12 @@ yarn start
 ```
 Then open http://localhost:4321/.
 
+### LED strip support
+
+Locally e.g. on Raspberry Pi it can also control an apa102 LED strip over [SPI0 pins](https://pinout.xyz/pinout/spi).  
+It auto-detects existence of `/dev/spidev0.0`, you can change device or opt out by `LEDS_APA102=` env var.
+
+Other useful vars: `LEDS_BRIGHTNESS=` (255 max, 8 at night), `LEDS_REVERSE=true` to start from the other end.
 
 ## How to run — terminal REPL
 
@@ -37,6 +40,7 @@ Press TAB to list of known commands.  You'll want a terminal that supports both 
 
 * Currently supports English and Hebrew; REPL language choosen by env vars e.g. `LANG=he.UTF-8 node repl.js`.
 * Translation pull requests welcome!
+* Same LEDs support.
 
 ## Why a stack language?
 
@@ -59,17 +63,17 @@ Press TAB to list of known commands.  You'll want a terminal that supports both 
     ```
     In weird structured postfix it'd become:
     ```
-    { ( (black, white)fade, (white, black)fade )join }twice
+    { ( (black, white)fade, (white, black)fade )glue }twice
     ```
     but there's all this punctuation to get right; in stack language it's just:
     ```
-         black  white fade   white  black fade  join  twice
+         black  white fade   white  black fade  glue  twice
     ```
 
     The price of no syntax is the structure is implicit and has to be inferred from each function's arity:
 
     ```
-    black white fade white black fade join twice
+    black white fade white black fade glue twice
     🡖-----🡖-----🡕    🡖-----🡖-----🡕
     🡖-----------------🡖---------------🡕
     🡖---------------------------------------🡕
@@ -102,11 +106,11 @@ So if I want to get rid of structure, **I need flat semantics**.  Control flow s
 We can regain a (limited) ability to express and combine behavior over time by making animations first-class values ⌚!
 
 - `fade` returns an animation which takes, say, 1 second.
-- `join` concatenates 2 animations into one.
-- `twice` = `2 times` = `dup join` just concatenates the top animation with itself.
+- `glue` concatenates 2 animations into one.
+- `twice` = `2 times` = `dup glue` just concatenates the top animation with itself.
 
 ```
-black    white    fade        white    black        fade        join             twice
+black    white    fade        white    black        fade        glue             twice
      [█]      [ ]     [█▓▒░ ]      [ ]      [█]         [ ░▒▓█]     [█▓▒░  ░▒▓█]      [█▓▒░  ░▒▓██▓▒░  ░▒▓█]
               [█]                  [█▓▒░ ]  [ ]         [█▓▒░ ]
                                             [█▓▒░ ]
@@ -148,4 +152,7 @@ Not entirely unlike turtle graphics, but with explicit operators to combine pict
 
 #### Interaction?!?
 
-I have some crazy ideas about how to represend input during games as appending words to definitions...  Pro: would work over collaborative editor for "multiplayer" (let's say step-based games only).  Con: crazy :-P.  Not sure at all yet if it's viable and whether it'll mix with current idea that stack elements are an animation over time...
+I have some crazy ideas about how to represend input during games as appending words to definitions...  
+Pro: would work over collaborative editor for "multiplayer" (let's say step-based games only).  Con: crazy :-P.  Not sure at all yet if it's viable and whether it'll mix with current idea that stack elements are an animation over time...
+
+For now exploring that in language-agnostic way at https://github.com/cben/model-view-self-modify

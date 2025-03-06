@@ -1,4 +1,5 @@
 const lang = require('./lang')
+const leds = require('./apa102_led_strip')
 
 const http = require('node:http')
 const staticHandler = require('serve-handler')
@@ -66,7 +67,11 @@ var server = http.createServer((request, response) => {
 })
 server.listen(4321)
 
-const TITLE = '>>> Serving on http://localhost:4321 <<<\n\n'
+const TITLE = `\
+${leds.status}
+>>> Serving on http://localhost:4321 <<<
+
+`
 
 // DISPLAY
 // -------
@@ -124,21 +129,56 @@ const showStack = stack => (
   )).join('')
 )
 
-const showResult = () => {
-  // TODO: don't clear here, only at end, to reduce flicker?
-  // Problem is that newline
+const BRIGHTNESS = parseInt(process.env.LEDS_BRIGHTNESS) || 255
+
+const ledsShowStackAtTime = async (stack, time) => {
+  //process.stdout.write(time + ' ')
+  let led = 0
+  for(let i = stack.length - 1; i >= 0; i--) {
+    const anim = stack[i]
+    // animate, when done, stay at final color
+    //const color = anim.color(Math.min(time, anim.duration))
+    // TODO: leds are far too bright, not similar to colors on screen
+    // (e.g. dark brown on screen is still quite bright pink on leds)
+    for(let t = 0; t <= anim.duration; t += 0.2) {
+      const color = anim.color(Math.min(t, anim.duration))
+      if(led < leds.NLEDS) {
+        leds.setRGBb(led++, lang.clipChannel(color.red), lang.clipChannel(color.green), lang.clipChannel(color.blue), BRIGHTNESS)
+      }
+      //process.stdout.write(showColor(color)(' ' + i))
+    }
+
+    // And a bigger gap between stack items:
+    leds.setRGBb(led++, 0, 0, 0, 0)
+    leds.setRGBb(led++, 0, 0, 0, 0)
+    leds.setRGBb(led++, 0, 0, 0, 0)
+  }
+
+  // clear to black beyond bottom of stack
+  while(led < leds.NLEDS) {
+    leds.setRGBb(led++, 0, 0, 0, 0)
+  }
+  await leds.send()
+  //process.stdout.write('\n')
+}
+
+const showResult = async () => {
   const printWithClearing = (text) => {
     process.stdout.write(text.replaceAll('\n', ANSI_CLEAR_CURSOR_TO_EOL + '\n'))
   }
   printWithClearing(ANSI_HOME + TITLE + '\n')
   const { state, errors } = evalResults
-  // clearing after printing reduces flicker
+
   printWithClearing(showStack(state.stack))
   for (const e of errors) {
     printWithClearing(chalk.red(e) + '\n')
   }
+  // clearing after printing reduces flicker
   printWithClearing('? ' + code.main + ANSI_CLEAR_CURSOR_TO_END)
+  await ledsShowStackAtTime(state.stack, 0)
 }
 
-showResult()
-setInterval(showResult, 1000)
+showResultContinuously = () =>
+  showResult().then(() => setTimeout(showResultContinuously, 1000))
+
+showResultContinuously()
