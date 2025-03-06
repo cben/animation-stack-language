@@ -4,7 +4,6 @@ const leds = require('./apa102_led_strip')
 const http = require('node:http')
 const staticHandler = require('serve-handler')
 const chalk = require('chalk')
-const stringWidth = require('string-width')
 
 const evalWords = (dictionary, stack0, program) => {
   let state = lang.initialState(dictionary, stack0)
@@ -57,7 +56,7 @@ var server = http.createServer((request, response) => {
           code = JSON.parse(body)
           evalResults = processCode(code)
           response.writeHead(200, { 'Content-Type': 'application/json' })
-          response.end(JSON.stringify("OK"))
+          response.end(JSON.stringify('OK'))
         } catch (err) {
           response.writeHead(400, { 'Content-Type': 'application/json' })
           response.end(JSON.stringify(err.toString()))
@@ -89,11 +88,11 @@ const PROMPT = '؟ ' // U+061F ARABIC QUESTION MARK
 
 const ERROR_CHAR = '✗' // U+2717 BALLOT X
 
-const ANSI_HOME = "\x1b[H"
-const ANSI_CURSOR_INVISIBLE = "\x1b[?25l"
-const ANSI_CURSOR_VISIBLE = "\x1b[?25l"
-const ANSI_CLEAR_CURSOR_TO_EOL = "\x1b[0K"
-const ANSI_CLEAR_CURSOR_TO_END = "\x1b[0J"
+const ANSI_HOME = '\x1b[H'
+const ANSI_CURSOR_INVISIBLE = '\x1b[?25l'
+const ANSI_CURSOR_VISIBLE = '\x1b[?25l'
+const ANSI_CLEAR_CURSOR_TO_EOL = '\x1b[0K'
+const ANSI_CLEAR_CURSOR_TO_END = '\x1b[0J'
 
 const showAnim = anim => {
   let s = ''

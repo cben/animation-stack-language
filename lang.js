@@ -175,12 +175,20 @@ words.add = binaryWord((a1, a2) => (
   ))
 ))
 
+// rgbAnimation -> redAnimation greenAnimation blueAnimation
+words.split = requireArgs(1, stack => {
+  const [anim, ...rest] = stack
+  let r = mapTime(anim, ({ red, green, blue }) => ({ red, green: 0, blue: 0 }))
+  let g = mapTime(anim, ({ red, green, blue }) => ({ red: 0, green, blue: 0 }))
+  let b = mapTime(anim, ({ red, green, blue }) => ({ red: 0, green: 0, blue }))
+  return [b, g, r, ...rest]
+})
+
 words.fade = binaryWord((a1, a2) => (
   mapTime2(a1, a2, (c1, c2, timeFraction) => (
     mixLight(c1, c2, timeFraction)
   ))
 ))
-
 
 // TODO naming: definitely not "concat". maybe "append"?
 words.glue = binaryWord((a2, a1) => (
@@ -195,16 +203,6 @@ words.glue = binaryWord((a2, a1) => (
 words.drop = requireArgs(1, ([x, ...rest]) => [...rest])
 words.copy = requireArgs(1, ([x, ...rest]) => [x, x, ...rest])
 words.swap = requireArgs(2, ([x, y, ...rest]) => [y, x, ...rest])
-
-// rgbAnimation -> redAnimation greenAnimation blueAnimation
-
-words.split = requireArgs(1, stack => {
-  const [anim, ...rest] = stack
-  let r = mapTime(anim, ({ red, green, blue }) => ({ red, green: 0, blue: 0 }))
-  let g = mapTime(anim, ({ red, green, blue }) => ({ red: 0, green, blue: 0 }))
-  let b = mapTime(anim, ({ red, green, blue }) => ({ red: 0, green: 0, blue }))
-  return [b, g, r, ...rest]
-})
 
 // i18n
 // ----
@@ -223,18 +221,18 @@ wordsByLanguage.he = {
   סגול: words.purple,
   לבן: words.white,
   הפוך: words.reverse, הפוכ: words.reverse,
-  מהר: words.fast,
   לאט: words.slow,
+  מהר: words.fast,
   כהה: words.dark,
   בהיר: words.light,
-  פצל: words.split,
   ערבב: words.mix,
-  מעבר: words.fade,
   חבר: words.add,
+  פצל: words.split,
+  מעבר: words.fade,
   הדבק: words.glue,
-  החלף: words.swap,
   זרוק: words.drop,
   שכפל: words.copy,
+  החלף: words.swap,
 }
 
 const userLanguage = () => {

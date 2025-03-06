@@ -161,9 +161,18 @@ const repl = async (dictionary, stack0) => {
   var reader = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
-    completer: line => (
-      [allCompletions.filter(w => w.startsWith(line)), line]
-    ),
+    completer: line => {
+      // If user moves cursor, the `line` this gets is just from start to cursor.
+      // No `.trim()` — here we want `foo bar|` to complete `bar...` words vs. `foo bar |` to complete all known words.
+      const lastWord = line.split(/\s+/).at(-1)
+      let options = allCompletions.filter(w => w.startsWith(lastWord))
+      // Append space after unique completion.  Both convenient and informative.
+      // `a` -> `add ` vs. `r` -> `re` (ambiguous `red`, `reverse`, needs another Tab to see that).
+      if (options.length === 1) {
+        options = [options[0] + ' ']
+      }
+      return [options, lastWord]
+    },
     prompt: PROMPT,
   })
 
@@ -174,10 +183,10 @@ const repl = async (dictionary, stack0) => {
   reader.on('line', async line => {
     for (let w of line.trim().split(/\s+/)) {
       if (w == '') {
-	    // Allow <Enter> to re-display stack, useful after losing sight from errors and completions
-	    await playStack(state.stack)
-	  } else {
-	    state = lang.evalSmallStep(state, w)
+        // Allow <Enter> to re-display stack, useful after losing sight from errors and completions
+        await playStack(state.stack)
+      } else {
+        state = lang.evalSmallStep(state, w)
         if (state.error) {
           console.error(`${ERROR_CHAR} ${state.error}: ${state.errorMessage}`)
         } else {
@@ -185,6 +194,7 @@ const repl = async (dictionary, stack0) => {
         }
       }
     }
+    reader.prompt()
   })
 
   // would be nice to return final state, but all evaluation
