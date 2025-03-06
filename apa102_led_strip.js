@@ -9,9 +9,24 @@
 
 const piSPI = require('pi-spi')
 
-const spi = piSPI.initialize("/dev/spidev0.0")
-// People say 4MHz and more work fine, Pi supports powers of two up to 32MHz.
-spi.clockSpeed(1e6)
+// `LEDS_APA102=` to disable, `LEDS_APA102=/dev/...` to override.
+const DEV = process.env.LEDS_APA102 ?? "/dev/spidev0.0"
+
+let spi = null
+let status = ''
+if (DEV) {
+  try {
+    spi = piSPI.initialize(DEV)
+    // People say 4MHz and more work fine, Pi supports powers of two up to 32MHz.
+    spi.clockSpeed(1e6)
+    status = `LEDS_APA102: opened ${DEV}`
+  } catch(e) {
+    status = `LEDS_APA102 error: ${e})`
+  }
+} else {
+  status = 'LEDS_APA102 disabled'
+}
+console.log(status)
 
 //const NLEDS = 150  // strip length, TODO make configurable
 // In Maayan's room, I cut off a few leds.
@@ -63,9 +78,14 @@ const clear = () => {
 // after start frame, all pixels must have MSB turned on
 clear()
 
-const send = () => {
-  //console.log(buf)
-  return new Promise(resolve => spi.write(buf, resolve))
-}
+const send = () =>
+  new Promise((resolve) => {
+    //console.log(buf)
+    if (spi) {
+      spi.write(buf, resolve)
+    } else {
+      resolve()
+    }
+  })
 
-module.exports = {NLEDS, clear, setRGBb, send, buf, spi} // buf, spi only for debug 
+module.exports = {status, NLEDS, clear, setRGBb, send, buf, spi} // buf, spi only for debug

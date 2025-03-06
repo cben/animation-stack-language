@@ -67,7 +67,11 @@ var server = http.createServer((request, response) => {
 })
 server.listen(4321)
 
-const TITLE = '>>> Serving on http://localhost:4321 <<<\n\n'
+const TITLE = `\
+${leds.status}
+>>> Serving on http://localhost:4321 <<<
+
+`
 
 // DISPLAY
 // -------
