@@ -221,6 +221,7 @@ const initEditor = () => {
     {
       autofocus: true,
       viewportMargin: Infinity, // https://codemirror.net/demo/resize.html
+      theme: 'xq-dark',
       ...editorConfig(),
     }
   )
