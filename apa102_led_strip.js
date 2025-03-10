@@ -7,15 +7,16 @@
 // You need spi-bcm2708 kernel module.
 // On raspbian `sudo raspi-config` -> Interfacing -> enable SPI.
 
-const piSPI = require('pi-spi')
-
 // `LEDS_APA102=` to disable, `LEDS_APA102=/dev/...` to override.
 const DEV = process.env.LEDS_APA102 ?? "/dev/spidev0.0"
 
+let piSPI = null
 let spi = null
 let status = ''
+
 if (DEV) {
   try {
+    piSPI = require('pi-spi')
     spi = piSPI.initialize(DEV)
     // People say 4MHz and more work fine, Pi supports powers of two up to 32MHz.
     spi.clockSpeed(1e6)

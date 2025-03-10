@@ -67,10 +67,16 @@ var server = http.createServer((request, response) => {
 })
 server.listen(4321)
 
+const truncate = (s, max) => {
+  s = s.replace(/\n/g, '   ')
+  if (s.length > max) {
+    s = s.slice(0, max) + '…'
+  }
+  return s
+}
 const TITLE = `\
-${leds.status}
+${truncate(leds.status, 78)}
 >>> Serving on http://localhost:4321 <<<
-
 `
 
 // DISPLAY
