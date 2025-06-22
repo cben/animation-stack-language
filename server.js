@@ -41,7 +41,7 @@ var evalResults = processCode(code)
 
 var server = http.createServer((request, response) => {
   if (!request.url.startsWith('/api/')) {
-    return staticHandler(request, response, { etag: true })
+    return staticHandler(request, response, { public: __dirname, etag: true })
   }
   if (request.url === '/api/code') {
     if (request.method === 'GET') {
