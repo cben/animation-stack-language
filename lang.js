@@ -39,6 +39,8 @@ const mixLight = (c1, c2, fraction) => (
 // ----------
 // .duration attribute in seconds
 // .color(time in [0,duration]) -> {red, green, blue}
+//
+// The representation as a function is stolen from SICP "picture language" (https://sourceacademy.org/sicpjs/2.2.4)
 
 // normalizes time to [0, 1] range, safely mapping t/0 to 0.
 const timeFraction = (time, duration) => (

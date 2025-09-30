@@ -119,6 +119,8 @@ black    white    fade        white    black        fade        glue            
 Visualizing processes as graphs of time is an important idea to teach in itself!
 Cf. Bret Victor's  http://worrydream.com/LadderOfAbstraction/ and http://worrydream.com/#!/MediaForThinkingTheUnthinkable .
 
+- Implementation: Like the "picture language" in [SICP](https://sourceacademy.org/sicpjs/2.2.4), each stack element is a time->color function.
+
 Alas, so far I've FAILED to explain this "animation" concept to my family ☹️
 
 ## Future
@@ -146,9 +148,26 @@ I want to plug this into something like firepad / Yjs to support remote coding s
 ### New types: vectors / graphics
 
 I want to progress into graphics and possibly even simple games.
-=> The stack element type will likely change to vectors / pictures.
+=> The stack element type will change to pictures, represented by (x,y)->color or maybe (x,y,time)->color functions.
 
 Not entirely unlike turtle graphics, but with explicit operators to combine pictures by movement / rotation / scaling / overlaying / intersections?
+
+- What this makes possible is a language where *all data structures are visual*.  Recursive structures are fractal.
+
+- Also, I'm thinking of constraining colors to some 2D colorspace; that way every pixel doubles as a "pointer" to a position,
+  and every "picture" can be used as a position->position mapping 🗺 .  
+  I'll need an "apply" or "compose" operation to "call" such mappings.  Weirdly, that means 1st-class functions that are NOT Turing-complete!  
+  But being able to fully *see* a function — more in mathematical than CS sense — is so cool I want to explore it...
+
+Prior art:
+
+- https://camilla-scholz.com/projects/feel/feel.html
+
+- [Forth Haiku Salon](https://forthsalon.appspot.com/), [source](https://github.com/flagxor/rainbowforth/tree/master/forthsalon).
+  The big model difference is haikus use absolute `x`, `y` params refering to pixel being rendered;
+  whereas treating each stack element as separate (x,y)->color function lets me transform existing pictures.
+
+- https://code.world/
 
 #### Interaction?!?
 
