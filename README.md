@@ -169,6 +169,8 @@ Prior art:
 
 - https://code.world/
 
+- https://github.com/mollerse/ait-lang
+
 #### Interaction?!?
 
 I have some crazy ideas about how to represend input during games as appending words to definitions...  
